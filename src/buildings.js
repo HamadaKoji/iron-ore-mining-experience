@@ -86,4 +86,16 @@ export class BuildingManager {
     clear() {
         this.buildings.clear();
     }
+
+    /**
+     * 指定位置に隣接するベルトがあるかチェック
+     * @param {number} x - X座標
+     * @param {number} y - Y座標
+     * @returns {boolean} 隣接ベルトの有無
+     */
+    hasAdjacentBelt(x, y) {
+        // 右隣にベルトがあるかチェック（採掘機は右方向にアイテムを出力）
+        const rightBuilding = this.getBuildingAt(x + 1, y);
+        return rightBuilding && rightBuilding.type === BUILDING_TYPES.BELT;
+    }
 }

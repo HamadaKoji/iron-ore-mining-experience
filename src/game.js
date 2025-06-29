@@ -14,6 +14,15 @@ export class Game {
         this.ironCount = 0;
         this.frameCounter = 0;
         
+        // 統計情報追跡
+        this.stats = {
+            ironPerMinute: 0,
+            ironHistory: [],
+            lastIronCount: 0,
+            lastStatsUpdate: Date.now(),
+            productionHistory: [] // 生産グラフ用
+        };
+        
         // モジュール初期化
         this.terrain = TerrainGenerator.generateTerrain();
         this.buildingManager = new BuildingManager();
@@ -21,6 +30,7 @@ export class Game {
         this.renderer = new Renderer(this.canvas);
         
         this.setupEventListeners();
+        this.setupProductionChart();
         this.gameLoop();
     }
 
@@ -36,12 +46,17 @@ export class Game {
         document.getElementById('chest-btn').addEventListener('click', 
             () => this.selectTool(BUILDING_TYPES.CHEST));
         
-        // キャンバスクリック
+        // キャンバスイベント
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
         this.canvas.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             this.handleRightClick(e);
         });
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseleave', () => this.handleMouseLeave());
+        
+        // プレビュー要素の初期化
+        this.previewElement = null;
     }
 
     /**
@@ -50,8 +65,45 @@ export class Game {
      */
     selectTool(tool) {
         this.selectedTool = tool;
-        document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(tool + '-btn').classList.add('active');
+        
+        // ボタンの状態を更新
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.classList.remove('active');
+            // ホバー効果をリセット
+            btn.style.transform = '';
+        });
+        
+        const activeBtn = document.getElementById(tool + '-btn');
+        activeBtn.classList.add('active');
+        
+        // 選択フィードバック（軽い振動効果）
+        activeBtn.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+            activeBtn.style.transform = '';
+        }, 150);
+        
+        // カーソルスタイルを変更
+        this.updateCursorStyle(tool);
+    }
+
+    /**
+     * カーソルスタイルを更新
+     * @param {string} tool - 選択されたツール
+     */
+    updateCursorStyle(tool) {
+        let cursor = 'crosshair';
+        switch(tool) {
+            case BUILDING_TYPES.MINER:
+                cursor = 'crosshair';
+                break;
+            case BUILDING_TYPES.BELT:
+                cursor = 'copy';
+                break;
+            case BUILDING_TYPES.CHEST:
+                cursor = 'grab';
+                break;
+        }
+        this.canvas.style.cursor = cursor;
     }
 
     /**
@@ -90,6 +142,92 @@ export class Game {
     }
 
     /**
+     * マウス移動処理
+     * @param {Event} e - マウス移動イベント
+     */
+    handleMouseMove(e) {
+        const { x, y } = this.getGridPosition(e.clientX, e.clientY);
+        if (x >= 0 && x < GAME_CONFIG.GRID_WIDTH && y >= 0 && y < GAME_CONFIG.GRID_HEIGHT) {
+            this.showBuildingPreview(x, y, e.clientX, e.clientY);
+        }
+    }
+
+    /**
+     * マウスがキャンバスから離れた時の処理
+     */
+    handleMouseLeave() {
+        this.hideBuildingPreview();
+    }
+
+    /**
+     * 建物プレビューを表示
+     * @param {number} gridX - グリッドX座標
+     * @param {number} gridY - グリッドY座標
+     * @param {number} mouseX - マウスX座標
+     * @param {number} mouseY - マウスY座標
+     */
+    showBuildingPreview(gridX, gridY, mouseX, mouseY) {
+        // 既存の建物がある場合はプレビューを表示しない
+        if (this.buildingManager.getBuildingAt(gridX, gridY)) {
+            this.hideBuildingPreview();
+            return;
+        }
+
+        // プレビュー要素がない場合は作成
+        if (!this.previewElement) {
+            this.previewElement = document.createElement('div');
+            this.previewElement.className = 'building-preview';
+            document.body.appendChild(this.previewElement);
+        }
+
+        // 設置可能かチェック
+        const canPlace = this.canPlaceBuilding(gridX, gridY, this.selectedTool);
+        this.previewElement.className = canPlace ? 'building-preview' : 'building-preview invalid';
+
+        // プレビューの位置とサイズを設定
+        const cellSize = 32; // GAME_CONFIG.CELL_SIZEと同じ値
+        const rect = this.canvas.getBoundingClientRect();
+        const canvasX = mouseX - rect.left;
+        const canvasY = mouseY - rect.top;
+        
+        this.previewElement.style.left = `${rect.left + Math.floor(canvasX / cellSize) * cellSize}px`;
+        this.previewElement.style.top = `${rect.top + Math.floor(canvasY / cellSize) * cellSize}px`;
+        this.previewElement.style.width = `${cellSize}px`;
+        this.previewElement.style.height = `${cellSize}px`;
+        this.previewElement.style.display = 'block';
+    }
+
+    /**
+     * 建物プレビューを非表示
+     */
+    hideBuildingPreview() {
+        if (this.previewElement) {
+            this.previewElement.style.display = 'none';
+        }
+    }
+
+    /**
+     * 建物が設置可能かチェック
+     * @param {number} x - X座標
+     * @param {number} y - Y座標
+     * @param {string} type - 建物タイプ
+     * @returns {boolean} 設置可能かどうか
+     */
+    canPlaceBuilding(x, y, type) {
+        // 既に建物がある場合は設置不可
+        if (this.buildingManager.getBuildingAt(x, y)) {
+            return false;
+        }
+
+        // 採掘機は鉱石の上にのみ設置可能
+        if (type === BUILDING_TYPES.MINER && this.terrain[y][x] !== 'ore') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * ゲーム更新
      */
     update() {
@@ -120,14 +258,27 @@ export class Game {
      * UI更新
      */
     updateUI() {
+        // 基本統計の更新
         document.getElementById('iron-count').textContent = this.ironCount;
+        
+        // 建物数の更新
+        const minerCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.MINER);
+        const beltCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.BELT);
+        const chestCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.CHEST);
+        
+        document.getElementById('miner-count').textContent = minerCount;
+        document.getElementById('belt-count').textContent = beltCount;
+        document.getElementById('chest-count').textContent = chestCount;
+        
+        // 統計情報の更新
+        this.updateStats();
+        
+        // 効率情報の更新
+        this.updateEfficiencyStats(minerCount, beltCount, chestCount);
         
         const debugElement = document.getElementById('debug-info');
         if (debugElement) {
             const totalItems = this.itemManager.getTotalItemCount();
-            const minerCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.MINER);
-            const beltCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.BELT);
-            const chestCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.CHEST);
             const itemsOnBelts = this.itemManager.getItemsOnBelts(this.buildingManager);
             
             debugElement.innerHTML = `
@@ -138,8 +289,147 @@ export class Game {
     }
 
     /**
-     * 描画
+     * 統計情報の更新
      */
+    updateStats() {
+        const now = Date.now();
+        const timeDiff = now - this.stats.lastStatsUpdate;
+        
+        // 1秒ごとに統計を更新
+        if (timeDiff >= 1000) {
+            const ironDiff = this.ironCount - this.stats.lastIronCount;
+            const ironPerSecond = ironDiff / (timeDiff / 1000);
+            this.stats.ironPerMinute = Math.round(ironPerSecond * 60);
+            
+            // 履歴に追加（最大60個まで保持）
+            this.stats.productionHistory.push({
+                time: now,
+                iron: this.ironCount,
+                rate: this.stats.ironPerMinute
+            });
+            
+            if (this.stats.productionHistory.length > 60) {
+                this.stats.productionHistory.shift();
+            }
+            
+            // UI更新
+            document.getElementById('iron-rate').textContent = `${this.stats.ironPerMinute}/分`;
+            
+            // グラフ更新
+            this.updateProductionChart();
+            
+            this.stats.lastIronCount = this.ironCount;
+            this.stats.lastStatsUpdate = now;
+        }
+    }
+
+    /**
+     * 効率統計の更新
+     */
+    updateEfficiencyStats(minerCount, beltCount, chestCount) {
+        // 採掘機効率（実際に採掘している採掘機の割合）
+        let activeMinerCount = 0;
+        this.buildingManager.getAllBuildings().forEach(building => {
+            if (building.type === BUILDING_TYPES.MINER) {
+                // 隣にベルトがあるかチェック
+                const hasAdjacentBelt = this.buildingManager.hasAdjacentBelt(building.x, building.y);
+                if (hasAdjacentBelt) activeMinerCount++;
+            }
+        });
+        
+        const minerEfficiency = minerCount > 0 ? Math.round((activeMinerCount / minerCount) * 100) : 0;
+        document.getElementById('miner-efficiency').textContent = `${minerEfficiency}% 稼働`;
+        
+        // ベルト使用率（アイテムが流れているベルトの割合）
+        const itemsOnBelts = this.itemManager.getItemsOnBelts(this.buildingManager);
+        const beltUsage = beltCount > 0 ? Math.min(100, Math.round((itemsOnBelts / beltCount) * 100)) : 0;
+        document.getElementById('belt-usage').textContent = `${beltUsage}% 使用`;
+        
+        // チェスト容量（仮想的な容量計算）
+        const maxChestCapacity = chestCount * 100; // 1チェストあたり100個と仮定
+        const chestCapacity = maxChestCapacity > 0 ? Math.min(100, Math.round((this.ironCount / maxChestCapacity) * 100)) : 0;
+        document.getElementById('chest-capacity').textContent = `${chestCapacity}% 満杯`;
+    }
+
+    /**
+     * 生産グラフの設定
+     */
+    setupProductionChart() {
+        this.chartCanvas = document.getElementById('productionChart');
+        this.chartCtx = this.chartCanvas.getContext('2d');
+    }
+
+    /**
+     * 生産グラフの更新
+     */
+    updateProductionChart() {
+        if (!this.chartCtx || this.stats.productionHistory.length < 2) return;
+        
+        const ctx = this.chartCtx;
+        const canvas = this.chartCanvas;
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // キャンバスをクリア
+        ctx.clearRect(0, 0, width, height);
+        
+        // 背景
+        ctx.fillStyle = '#34495e';
+        ctx.fillRect(0, 0, width, height);
+        
+        // グリッド線
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 1;
+        
+        // 縦線
+        for (let i = 0; i <= 10; i++) {
+            const x = (width / 10) * i;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+        
+        // 横線
+        for (let i = 0; i <= 5; i++) {
+            const y = (height / 5) * i;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+        
+        // データがない場合は終了
+        if (this.stats.productionHistory.length === 0) return;
+        
+        // データの最大値を取得
+        const maxIron = Math.max(...this.stats.productionHistory.map(d => d.iron), 1);
+        
+        // 生産量のライン
+        ctx.strokeStyle = '#e67e22';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        this.stats.productionHistory.forEach((data, index) => {
+            const x = (width / (this.stats.productionHistory.length - 1)) * index;
+            const y = height - (data.iron / maxIron) * height;
+            
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        
+        ctx.stroke();
+        
+        // 現在値の表示
+        ctx.fillStyle = '#ecf0f1';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(`最大: ${maxIron}`, width - 5, 15);
+        ctx.fillText(`現在: ${this.ironCount}`, width - 5, height - 5);
+    }
     render() {
         this.renderer.clear();
         this.renderer.renderTerrain(this.terrain);

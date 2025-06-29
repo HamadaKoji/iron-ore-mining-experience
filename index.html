@@ -81,7 +81,44 @@
             
             <div class="status">
                 <h3>📊 生産状況</h3>
-                <p>🔩 鉄鉱石: <span id="iron-count">0</span> 個</p>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">🔩</div>
+                        <div class="stat-info">
+                            <div class="stat-label">鉄鉱石</div>
+                            <div class="stat-value" id="iron-count">0</div>
+                            <div class="stat-rate" id="iron-rate">0/分</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">⛏️</div>
+                        <div class="stat-info">
+                            <div class="stat-label">採掘機</div>
+                            <div class="stat-value" id="miner-count">0</div>
+                            <div class="stat-rate" id="miner-efficiency">0% 稼働</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">➡️</div>
+                        <div class="stat-info">
+                            <div class="stat-label">ベルト</div>
+                            <div class="stat-value" id="belt-count">0</div>
+                            <div class="stat-rate" id="belt-usage">0% 使用</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <div class="stat-label">チェスト</div>
+                            <div class="stat-value" id="chest-count">0</div>
+                            <div class="stat-rate" id="chest-capacity">0% 満杯</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="production-chart">
+                    <h4>📈 生産グラフ</h4>
+                    <canvas id="productionChart" width="300" height="100"></canvas>
+                </div>
                 <div id="debug-info" style="font-size: 12px; color: #bdc3c7; margin-top: 10px;"></div>
             </div>
         </div>
