@@ -1,4 +1,4 @@
-import { GAME_CONFIG, BUILDING_TYPES } from './config.js';
+import { GAME_CONFIG, BUILDING_TYPES, RESOURCE_TYPES } from './config.js';
 import { TerrainGenerator } from './terrain.js';
 import { BuildingManager } from './buildings.js';
 import { ItemManager } from './items.js';
@@ -11,14 +11,28 @@ export class Game {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.selectedTool = BUILDING_TYPES.MINER;
-        this.ironCount = 0;
+        
+        // 各資源のカウント
+        this.resourceCounts = {
+            iron: 0,
+            copper: 0,
+            coal: 0
+        };
+        
         this.frameCounter = 0;
         
         // 統計情報追跡
         this.stats = {
-            ironPerMinute: 0,
-            ironHistory: [],
-            lastIronCount: 0,
+            resourceRates: {
+                iron: 0,
+                copper: 0,
+                coal: 0
+            },
+            lastResourceCounts: {
+                iron: 0,
+                copper: 0,
+                coal: 0
+            },
             lastStatsUpdate: Date.now(),
             productionHistory: [] // 生産グラフ用
         };
@@ -237,7 +251,9 @@ export class Game {
                 building.timer++;
                 if (building.timer >= GAME_CONFIG.MINING_INTERVAL) {
                     building.timer = 0;
-                    this.itemManager.addItem(building.x, building.y, 'iron');
+                    // 建物に記録された資源タイプに基づいてアイテムを生成
+                    const resourceType = building.resourceType || 'iron';
+                    this.itemManager.addItem(building.x, building.y, resourceType);
                 }
             }
         });
@@ -247,7 +263,13 @@ export class Game {
         if (this.frameCounter >= GAME_CONFIG.BELT_MOVE_INTERVAL) {
             this.frameCounter = 0;
             const collectedItems = this.itemManager.moveItems(this.buildingManager);
-            this.ironCount += collectedItems;
+            
+            // 回収されたアイテムを資源別にカウント
+            Object.keys(collectedItems).forEach(resourceType => {
+                if (this.resourceCounts.hasOwnProperty(resourceType)) {
+                    this.resourceCounts[resourceType] += collectedItems[resourceType];
+                }
+            });
         }
         
         // UI更新
@@ -258,8 +280,10 @@ export class Game {
      * UI更新
      */
     updateUI() {
-        // 基本統計の更新
-        document.getElementById('iron-count').textContent = this.ironCount;
+        // 各資源の統計更新
+        document.getElementById('iron-count').textContent = this.resourceCounts.iron;
+        document.getElementById('copper-count').textContent = this.resourceCounts.copper;
+        document.getElementById('coal-count').textContent = this.resourceCounts.coal;
         
         // 建物数の更新
         const minerCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.MINER);
@@ -297,28 +321,38 @@ export class Game {
         
         // 1秒ごとに統計を更新
         if (timeDiff >= 1000) {
-            const ironDiff = this.ironCount - this.stats.lastIronCount;
-            const ironPerSecond = ironDiff / (timeDiff / 1000);
-            this.stats.ironPerMinute = Math.round(ironPerSecond * 60);
+            // 各資源の生産レートを計算
+            Object.keys(this.resourceCounts).forEach(resourceType => {
+                const currentCount = this.resourceCounts[resourceType];
+                const lastCount = this.stats.lastResourceCounts[resourceType];
+                const diff = currentCount - lastCount;
+                const perSecond = diff / (timeDiff / 1000);
+                this.stats.resourceRates[resourceType] = Math.round(perSecond * 60);
+                
+                // UI更新
+                const rateElement = document.getElementById(`${resourceType}-rate`);
+                if (rateElement) {
+                    rateElement.textContent = `${this.stats.resourceRates[resourceType]}/分`;
+                }
+                
+                // 最後のカウントを更新
+                this.stats.lastResourceCounts[resourceType] = currentCount;
+            });
             
             // 履歴に追加（最大60個まで保持）
             this.stats.productionHistory.push({
                 time: now,
-                iron: this.ironCount,
-                rate: this.stats.ironPerMinute
+                ...this.resourceCounts,
+                rates: {...this.stats.resourceRates}
             });
             
             if (this.stats.productionHistory.length > 60) {
                 this.stats.productionHistory.shift();
             }
             
-            // UI更新
-            document.getElementById('iron-rate').textContent = `${this.stats.ironPerMinute}/分`;
-            
             // グラフ更新
             this.updateProductionChart();
             
-            this.stats.lastIronCount = this.ironCount;
             this.stats.lastStatsUpdate = now;
         }
     }

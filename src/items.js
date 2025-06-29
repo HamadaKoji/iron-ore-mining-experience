@@ -41,11 +41,15 @@ export class ItemManager {
     /**
      * アイテムを移動
      * @param {BuildingManager} buildingManager - 建物管理インスタンス
-     * @returns {number} 回収されたアイテム数
+     * @returns {Object} 回収されたアイテム数（資源タイプ別）
      */
     moveItems(buildingManager) {
         const newItems = new Map();
-        let collectedItems = 0;
+        const collectedItems = {
+            iron: 0,
+            copper: 0,
+            coal: 0
+        };
         
         this.items.forEach((itemList, key) => {
             const [x, y] = key.split(',').map(Number);
@@ -92,8 +96,9 @@ export class ItemManager {
                     
                     // チェストに到達したアイテムは回収
                     if (targetBuilding && targetBuilding.type === BUILDING_TYPES.CHEST) {
-                        if (item.type === 'iron') {
-                            collectedItems++;
+                        // 資源タイプ別にカウント
+                        if (collectedItems.hasOwnProperty(item.type)) {
+                            collectedItems[item.type]++;
                         }
                         return; // アイテム消去（回収完了）
                     }

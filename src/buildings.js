@@ -1,4 +1,5 @@
 import { BUILDING_TYPES, TERRAIN_TYPES } from './config.js';
+import { TerrainGenerator } from './terrain.js';
 
 /**
  * 建物管理クラス
@@ -24,8 +25,8 @@ export class BuildingManager {
             return false;
         }
 
-        // 採掘機は鉱石の上にのみ設置可能
-        if (type === BUILDING_TYPES.MINER && terrain[y][x] !== TERRAIN_TYPES.ORE) {
+        // 採掘機は採掘可能な資源の上にのみ設置可能
+        if (type === BUILDING_TYPES.MINER && !TerrainGenerator.isMineable(terrain, x, y)) {
             return false;
         }
 
@@ -33,7 +34,10 @@ export class BuildingManager {
             type: type,
             x: x,
             y: y,
-            timer: 0
+            timer: 0,
+            // 採掘機の場合、採掘する資源タイプを記録
+            resourceType: type === BUILDING_TYPES.MINER ? 
+                TerrainGenerator.getResourceType(terrain[y][x]) : null
         };
 
         this.buildings.set(key, building);
