@@ -1,0 +1,253 @@
+# 開発ガイドライン
+
+このドキュメントは「初めての鉄鉱石採掘体験」プロジェクトの開発を継続的に進めるための指針を定めています。
+
+## 🎯 開発理念
+
+### プロジェクトの目標
+- **学習体験の提供**: 工場自動化の基本概念を楽しく学べる
+- **シンプルさの維持**: 複雑さを避け、理解しやすいコードベース
+- **品質の保証**: テスト駆動開発による安定性確保
+- **拡張性の確保**: 新機能を安全に追加できる設計
+
+### 開発原則
+1. **テストファースト**: 新機能は必ずテストと共に実装
+2. **モジュラー設計**: 単一責任の原則に従った分割
+3. **ドキュメント重視**: コードと同じレベルでドキュメントを維持
+4. **ユーザー体験優先**: 技術的な複雑さをユーザーに見せない
+
+## 🔧 開発環境
+
+### 必要なツール
+- **Node.js** (v14以上推奨)
+- **モダンブラウザ** (ES6モジュール対応)
+- **Git** (バージョン管理)
+- **テキストエディタ** (VS Code推奨)
+
+### 推奨VS Code拡張機能
+```json
+{
+  "recommendations": [
+    "ms-vscode.vscode-json",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-eslint"
+  ]
+}
+```
+
+## 🌿 ブランチ戦略
+
+### ブランチ命名規則
+```
+main                    # 本番リリース用
+feature/機能名          # 新機能開発
+fix/修正内容           # バグ修正
+docs/ドキュメント名     # ドキュメント更新
+refactor/リファクタ内容 # コード改善
+test/テスト内容        # テスト追加・修正
+```
+
+### 開発フロー
+1. **ブランチ作成**: `git checkout -b feature/new-feature`
+2. **開発・テスト**: 機能実装とテスト作成
+3. **コミット**: 意味のある単位でコミット
+4. **プッシュ**: `git push origin feature/new-feature`
+5. **プルリクエスト**: GitHubでPR作成
+6. **レビュー・マージ**: コードレビュー後にマージ
+7. **ブランチ削除**: マージ後にブランチクリーンアップ
+
+## 📝 コミットメッセージ規約
+
+### フォーマット
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### タイプ
+- `✨ feat`: 新機能
+- `🐛 fix`: バグ修正
+- `📚 docs`: ドキュメント更新
+- `🎨 style`: コードフォーマット
+- `♻️ refactor`: リファクタリング
+- `🧪 test`: テスト追加・修正
+- `⚡ perf`: パフォーマンス改善
+- `🔧 chore`: その他の変更
+
+### 例
+```
+✨ feat(buildings): 製錬炉システムを追加
+
+- 鉄鉱石から鉄板を生成する製錬炉を実装
+- 燃料システム（石炭）を追加
+- 製錬時間とアニメーション効果を実装
+
+Closes #15
+```
+
+## 🧪 テスト戦略
+
+### テストの種類
+1. **ユニットテスト**: 各モジュールの単体テスト
+2. **統合テスト**: モジュール間の連携テスト
+3. **E2Eテスト**: ユーザーシナリオのテスト（将来実装）
+
+### テスト実行
+```bash
+# 全テスト実行
+npm test
+
+# ブラウザでテスト実行
+npm run dev
+# http://localhost:8000/test.html
+
+# 特定のテストファイル実行
+node tests/terrain.test.js
+```
+
+### テスト作成ガイドライン
+- **新機能には必ずテストを追加**
+- **エッジケースを含む包括的なテスト**
+- **テスト名は日本語で分かりやすく**
+- **テストの独立性を保つ**
+
+## 🏗️ コーディング規約
+
+### JavaScript
+```javascript
+// ✅ Good
+const BUILDING_TYPES = {
+    MINER: 'miner',
+    BELT: 'belt'
+};
+
+class BuildingManager {
+    constructor() {
+        this.buildings = new Map();
+    }
+    
+    placeBuilding(x, y, type, terrain) {
+        // 実装...
+    }
+}
+
+// ❌ Bad
+var buildingTypes = {
+    miner: 'miner',
+    belt: 'belt'
+};
+
+function placeBuilding(x, y, type) {
+    // グローバル変数を使用...
+}
+```
+
+### 命名規則
+- **定数**: `UPPER_SNAKE_CASE`
+- **クラス**: `PascalCase`
+- **関数・変数**: `camelCase`
+- **ファイル**: `kebab-case.js`
+
+### コメント
+```javascript
+/**
+ * 建物を設置する
+ * @param {number} x - X座標
+ * @param {number} y - Y座標
+ * @param {string} type - 建物タイプ
+ * @param {Array<Array<string>>} terrain - 地形データ
+ * @returns {boolean} 設置成功かどうか
+ */
+placeBuilding(x, y, type, terrain) {
+    // 実装...
+}
+```
+
+## 📊 パフォーマンス指針
+
+### 最適化の優先順位
+1. **アルゴリズムの効率性**
+2. **メモリ使用量の最適化**
+3. **描画パフォーマンス**
+4. **ネットワーク最適化**（将来のマルチプレイヤー対応）
+
+### 測定方法
+```javascript
+// パフォーマンス測定例
+console.time('itemMovement');
+this.itemManager.moveItems(this.buildingManager);
+console.timeEnd('itemMovement');
+```
+
+## 🔒 セキュリティ考慮事項
+
+### 現在の対策
+- **入力値検証**: 座標範囲チェック
+- **XSS対策**: innerHTML使用時の注意
+- **CSP**: Content Security Policy（将来実装）
+
+### 将来の考慮事項
+- **セーブデータの検証**
+- **マルチプレイヤー時の不正防止**
+- **API通信の暗号化**
+
+## 📱 ブラウザ対応
+
+### サポート対象
+- **Chrome** 80+
+- **Firefox** 75+
+- **Safari** 13+
+- **Edge** 80+
+
+### 非対応
+- **Internet Explorer** (ES6モジュール非対応)
+
+## 🚀 デプロイメント
+
+### GitHub Pages
+- **自動デプロイ**: mainブランチへのマージで自動更新
+- **URL**: https://hamadakoji.github.io/iron-ore-mining-experience/
+
+### ローカル開発
+```bash
+# 開発サーバー起動
+npm run dev
+
+# アクセス
+http://localhost:8000
+```
+
+## 📈 メトリクス
+
+### 品質指標
+- **テストカバレッジ**: 80%以上を維持
+- **テスト成功率**: 100%を維持
+- **コードレビュー**: 全PRでレビュー実施
+
+### パフォーマンス指標
+- **初期ロード時間**: 3秒以内
+- **フレームレート**: 60fps維持
+- **メモリ使用量**: 50MB以内
+
+## 🤝 コラボレーション
+
+### コミュニケーション
+- **GitHub Issues**: バグ報告・機能要望
+- **GitHub Discussions**: 設計議論
+- **Pull Request**: コードレビュー
+
+### レビュー観点
+1. **機能要件の満足**
+2. **テストの網羅性**
+3. **コード品質**
+4. **パフォーマンス影響**
+5. **ドキュメント更新**
+
+---
+
+このガイドラインは開発の進行に合わせて継続的に更新していきます。
+質問や提案があれば、GitHub Issuesでお気軽にお知らせください。
