@@ -1,0 +1,27 @@
+{
+  "name": "iron-ore-mining-experience",
+  "version": "1.1.0",
+  "description": "初めての鉄鉱石採掘体験 - Factorio風シンプル工場シミュレーションゲーム",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "dev": "python3 -m http.server 8000",
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "game",
+    "simulation",
+    "factory",
+    "javascript",
+    "html5",
+    "canvas"
+  ],
+  "author": "HamadaKoji",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HamadaKoji/iron-ore-mining-experience.git"
+  },
+  "homepage": "https://hamadakoji.github.io/iron-ore-mining-experience/"
+}

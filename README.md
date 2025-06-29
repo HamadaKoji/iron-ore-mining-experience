@@ -24,6 +24,53 @@ Factorio風のシンプルな工場シミュレーションゲームです。採
 - **右クリック**: 建物削除
 - **ツールバー**: 設置する建物を選択
 
+## 🧪 テスト
+
+このプロジェクトには包括的なユニットテストが含まれています。
+
+### テスト実行方法
+
+**ブラウザでテスト実行:**
+```bash
+# ローカルサーバーを起動
+npm run dev
+# または
+python3 -m http.server 8000
+
+# ブラウザで http://localhost:8000/test.html にアクセス
+```
+
+**コマンドラインでテスト実行:**
+```bash
+npm test
+# または
+node tests/run-tests.js
+```
+
+### テスト内容
+- **地形生成テスト**: 地形の生成、鉱石配置、座標取得
+- **建物管理テスト**: 建物の設置・削除、制約チェック
+- **アイテム管理テスト**: アイテムの移動、回収、停止
+
+### コード構造
+```
+src/
+├── config.js          # ゲーム設定・定数
+├── terrain.js         # 地形生成
+├── buildings.js       # 建物管理
+├── items.js          # アイテム管理
+├── renderer.js       # 描画処理
+├── game.js           # メインゲームクラス
+└── main.js           # エントリーポイント
+
+tests/
+├── test-framework.js  # テストフレームワーク
+├── terrain.test.js    # 地形テスト
+├── buildings.test.js  # 建物テスト
+├── items.test.js     # アイテムテスト
+└── run-tests.js      # テスト実行
+```
+
 ## 🛠️ 技術仕様
 
 - **言語**: HTML5, CSS3, JavaScript (Vanilla)

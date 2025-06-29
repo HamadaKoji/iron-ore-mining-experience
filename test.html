@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>テスト実行 - 初めての鉄鉱石採掘体験</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #console {
+            background-color: #000000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 20px;
+            height: 600px;
+            overflow-y: auto;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .run-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .run-button:hover {
+            background-color: #45a049;
+        }
+        .info {
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 テスト実行 - 初めての鉄鉱石採掘体験</h1>
+        
+        <div class="info">
+            <h3>📋 テスト内容</h3>
+            <ul>
+                <li><strong>地形生成テスト</strong>: 地形の生成、鉱石配置、座標取得</li>
+                <li><strong>建物管理テスト</strong>: 建物の設置・削除、制約チェック</li>
+                <li><strong>アイテム管理テスト</strong>: アイテムの移動、回収、停止</li>
+            </ul>
+        </div>
+        
+        <button class="run-button" onclick="runTests()">🚀 テスト実行</button>
+        
+        <div id="console"></div>
+    </div>
+
+    <script type="module">
+        import { terrainTests } from './tests/terrain.test.js';
+        import { buildingTests } from './tests/buildings.test.js';
+        import { itemTests } from './tests/items.test.js';
+
+        const consoleElement = document.getElementById('console');
+        
+        // コンソール出力をHTMLに表示
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            consoleElement.textContent += args.join(' ') + '\n';
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            consoleElement.textContent += args.join(' ') + '\n';
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+            originalError.apply(console, args);
+        };
+
+        window.runTests = async function() {
+            consoleElement.textContent = '';
+            
+            try {
+                console.log('🚀 初めての鉄鉱石採掘体験 - テスト実行\n');
+                
+                console.log('📍 地形生成テスト');
+                console.log('='.repeat(50));
+                await terrainTests.runAll();
+                
+                console.log('\n🏗️  建物管理テスト');
+                console.log('='.repeat(50));
+                await buildingTests.runAll();
+                
+                console.log('\n📦 アイテム管理テスト');
+                console.log('='.repeat(50));
+                await itemTests.runAll();
+                
+                // 全体の結果
+                const totalPassed = terrainTests.results.passed + buildingTests.results.passed + itemTests.results.passed;
+                const totalFailed = terrainTests.results.failed + buildingTests.results.failed + itemTests.results.failed;
+                const totalTests = terrainTests.results.total + buildingTests.results.total + itemTests.results.total;
+                
+                console.log('\n' + '='.repeat(60));
+                console.log('🎯 全体テスト結果');
+                console.log('='.repeat(60));
+                console.log(`✅ 成功: ${totalPassed}`);
+                console.log(`❌ 失敗: ${totalFailed}`);
+                console.log(`📈 合計: ${totalTests}`);
+                console.log(`🎯 成功率: ${((totalPassed / totalTests) * 100).toFixed(1)}%`);
+                
+                if (totalFailed === 0) {
+                    console.log('\n🎉 全テスト成功！コードの品質が保証されています。');
+                } else {
+                    console.log('\n⚠️  失敗したテストがあります。修正が必要です。');
+                }
+                
+            } catch (error) {
+                console.error('テスト実行中にエラーが発生しました:', error);
+            }
+        };
+    </script>
+</body>
+</html>
