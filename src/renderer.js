@@ -165,37 +165,59 @@ export class Renderer {
     }
 
     /**
-     * ヒントを描画
+     * ヒントを描画（改善版）
      * @param {number} buildingCount - 建物総数
      * @param {boolean} hasMiners - 採掘機があるか
      * @param {boolean} hasBelts - ベルトがあるか
      * @param {boolean} hasChests - チェストがあるか
      */
     renderHints(buildingCount, hasMiners, hasBelts, hasChests) {
+        const hintY = GAME_CONFIG.GRID_HEIGHT * GAME_CONFIG.CELL_SIZE - 80; // 画面下部に配置
+        
         // 建物が何もない場合のヒント
         if (buildingCount === 0) {
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(10, 10, 300, 60);
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.font = '14px Arial';
-            this.ctx.fillText('🎯 まずは茶色の鉱石エリアに', 20, 30);
-            this.ctx.fillText('   採掘機を設置してみよう！', 20, 50);
+            this.ctx.fillStyle = 'rgba(44, 62, 80, 0.9)';
+            this.ctx.fillRect(10, hintY, 350, 60);
+            
+            // 境界線
+            this.ctx.strokeStyle = '#3498db';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(10, hintY, 350, 60);
+            
+            this.ctx.fillStyle = '#ecf0f1';
+            this.ctx.font = 'bold 14px Arial';
+            this.ctx.fillText('🎯 資源エリアに採掘機を設置してみよう！', 20, hintY + 25);
+            this.ctx.font = '12px Arial';
+            this.ctx.fillStyle = '#bdc3c7';
+            this.ctx.fillText('🔩鉄鉱石(茶) 🟠銅鉱石(橙) ⚫石炭(黒) - どれでもOK！', 20, hintY + 45);
         }
         
-        if (hasMiners && !hasBelts && buildingCount < 5) {
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(10, 80, 280, 40);
-            this.ctx.fillStyle = '#4169E1';
-            this.ctx.font = '14px Arial';
-            this.ctx.fillText('📦 次はベルトで運搬ラインを作ろう！', 20, 105);
+        // 採掘機はあるがベルトがない場合
+        else if (hasMiners && !hasBelts && buildingCount < 8) {
+            this.ctx.fillStyle = 'rgba(44, 62, 80, 0.9)';
+            this.ctx.fillRect(10, hintY, 320, 40);
+            
+            this.ctx.strokeStyle = '#27ae60';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(10, hintY, 320, 40);
+            
+            this.ctx.fillStyle = '#ecf0f1';
+            this.ctx.font = 'bold 14px Arial';
+            this.ctx.fillText('➡️ ベルトで運搬ラインを作ろう！', 20, hintY + 25);
         }
         
-        if (hasMiners && hasBelts && !hasChests && buildingCount < 10) {
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(10, 130, 300, 40);
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.font = '14px Arial';
-            this.ctx.fillText('💰 最後にチェストでアイテムを回収！', 20, 155);
+        // ベルトはあるがチェストがない場合
+        else if (hasMiners && hasBelts && !hasChests) {
+            this.ctx.fillStyle = 'rgba(44, 62, 80, 0.9)';
+            this.ctx.fillRect(10, hintY, 300, 40);
+            
+            this.ctx.strokeStyle = '#f39c12';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(10, hintY, 300, 40);
+            
+            this.ctx.fillStyle = '#ecf0f1';
+            this.ctx.font = 'bold 14px Arial';
+            this.ctx.fillText('📦 チェストでアイテムを回収しよう！', 20, hintY + 25);
         }
     }
 }
