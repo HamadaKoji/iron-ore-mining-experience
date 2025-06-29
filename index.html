@@ -8,120 +8,109 @@
 </head>
 <body>
     <div class="game-container">
-        <!-- キービジュアル -->
-        <div class="hero-section">
-            <img src="hero-image.svg" alt="初めての鉄鉱石採掘体験" class="hero-image">
-        </div>
+        <!-- ヘッダー -->
+        <header class="game-header">
+            <div class="header-content">
+                <h1 class="game-title">🪨 初めての鉄鉱石採掘体験</h1>
+                <div class="toolbar">
+                    <button id="miner-btn" class="tool-btn active">⛏️ 採掘機</button>
+                    <button id="belt-btn" class="tool-btn">➡️ ベルト</button>
+                    <button id="chest-btn" class="tool-btn">📦 チェスト</button>
+                </div>
+            </div>
+        </header>
         
-        <!-- 建物選択UI -->
-        <div class="toolbar">
-            <button id="miner-btn" class="tool-btn active">⛏️ 採掘機</button>
-            <button id="belt-btn" class="tool-btn">➡️ ベルト</button>
-            <button id="chest-btn" class="tool-btn">📦 チェスト</button>
-        </div>
-        
-        <!-- ゲーム画面 -->
-        <canvas id="gameCanvas" width="640" height="480"></canvas>
-        
-        <!-- 情報表示 -->
-        <div class="info">
-            <div class="controls">
-                <h3>🎮 操作方法</h3>
-                <p><strong>左クリック:</strong> 建物設置 | <strong>右クリック:</strong> 建物削除</p>
-                <p><strong>ツールバー:</strong> 設置する建物を選択</p>
+        <!-- メインコンテンツ -->
+        <main class="game-main">
+            <!-- ゲーム画面 -->
+            <div class="game-area">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
             </div>
             
-            <div class="tutorial">
-                <h3>📖 遊び方ガイド</h3>
-                <div class="steps">
-                    <div class="step">
-                        <span class="step-number">1</span>
-                        <div class="step-content">
-                            <strong>🪨 鉱石を見つけよう</strong>
-                            <p>茶色のエリアに🪨マークがある場所が鉄鉱石です。ここに⛏️採掘機を設置できます。</p>
+            <!-- サイドパネル -->
+            <aside class="side-panel">
+                <!-- 生産統計 -->
+                <section class="stats-section">
+                    <h3 class="section-title">📊 生産統計</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card primary">
+                            <div class="stat-icon">🔩</div>
+                            <div class="stat-info">
+                                <div class="stat-label">鉄鉱石</div>
+                                <div class="stat-value" id="iron-count">0</div>
+                                <div class="stat-rate" id="iron-rate">0/分</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⛏️</div>
+                            <div class="stat-info">
+                                <div class="stat-label">採掘機</div>
+                                <div class="stat-value" id="miner-count">0</div>
+                                <div class="stat-rate" id="miner-efficiency">0% 稼働</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">➡️</div>
+                            <div class="stat-info">
+                                <div class="stat-label">ベルト</div>
+                                <div class="stat-value" id="belt-count">0</div>
+                                <div class="stat-rate" id="belt-usage">0% 使用</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📦</div>
+                            <div class="stat-info">
+                                <div class="stat-label">チェスト</div>
+                                <div class="stat-value" id="chest-count">0</div>
+                                <div class="stat-rate" id="chest-capacity">0% 満杯</div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="step">
-                        <span class="step-number">2</span>
-                        <div class="step-content">
-                            <strong>⛏️ 採掘機を設置</strong>
-                            <p>「⛏️ 採掘機」を選択して、🪨鉱石エリアをクリック。自動で🔩鉄鉱石の採掘開始！</p>
+                </section>
+
+                <!-- 生産グラフ -->
+                <section class="chart-section">
+                    <h3 class="section-title">📈 生産グラフ</h3>
+                    <div class="chart-container">
+                        <canvas id="productionChart" width="300" height="120"></canvas>
+                    </div>
+                </section>
+
+                <!-- 操作ガイド -->
+                <section class="guide-section">
+                    <h3 class="section-title">🎮 操作ガイド</h3>
+                    <div class="guide-content">
+                        <div class="guide-item">
+                            <span class="guide-key">左クリック</span>
+                            <span class="guide-desc">建物設置</span>
+                        </div>
+                        <div class="guide-item">
+                            <span class="guide-key">右クリック</span>
+                            <span class="guide-desc">建物削除</span>
+                        </div>
+                        <div class="guide-steps">
+                            <div class="step-mini">
+                                <span class="step-num">1</span>
+                                <span class="step-text">🪨鉱石エリアに⛏️採掘機を設置</span>
+                            </div>
+                            <div class="step-mini">
+                                <span class="step-num">2</span>
+                                <span class="step-text">➡️ベルトで運搬ルートを作成</span>
+                            </div>
+                            <div class="step-mini">
+                                <span class="step-num">3</span>
+                                <span class="step-text">📦チェストでアイテムを回収</span>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="step">
-                        <span class="step-number">3</span>
-                        <div class="step-content">
-                            <strong>➡️ ベルトで運搬</strong>
-                            <p>「➡️ ベルト」を選択して、⛏️採掘機の右側から一直線に設置。<strong>ベルトがないと🔩アイテムは運ばれません！</strong></p>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <span class="step-number">4</span>
-                        <div class="step-content">
-                            <strong>📦 チェストで回収</strong>
-                            <p>「📦 チェスト」を➡️ベルトの終点に設置。🔩アイテムが自動回収され、鉄鉱石カウンターが増加！</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="tips">
-                    <h4>💡 コツ</h4>
-                    <ul>
-                        <li>複数の採掘機を設置して生産量アップ</li>
-                        <li>ベルトは右方向にのみアイテムを運びます</li>
-                        <li>採掘機は鉱石エリア（茶色）にのみ設置可能</li>
-                        <li><strong>採掘機の隣にベルトがないとアイテムは運ばれません</strong></li>
-                        <li>間違えたら右クリックで建物を削除</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="status">
-                <h3>📊 生産状況</h3>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-icon">🔩</div>
-                        <div class="stat-info">
-                            <div class="stat-label">鉄鉱石</div>
-                            <div class="stat-value" id="iron-count">0</div>
-                            <div class="stat-rate" id="iron-rate">0/分</div>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon">⛏️</div>
-                        <div class="stat-info">
-                            <div class="stat-label">採掘機</div>
-                            <div class="stat-value" id="miner-count">0</div>
-                            <div class="stat-rate" id="miner-efficiency">0% 稼働</div>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon">➡️</div>
-                        <div class="stat-info">
-                            <div class="stat-label">ベルト</div>
-                            <div class="stat-value" id="belt-count">0</div>
-                            <div class="stat-rate" id="belt-usage">0% 使用</div>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon">📦</div>
-                        <div class="stat-info">
-                            <div class="stat-label">チェスト</div>
-                            <div class="stat-value" id="chest-count">0</div>
-                            <div class="stat-rate" id="chest-capacity">0% 満杯</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="production-chart">
-                    <h4>📈 生産グラフ</h4>
-                    <canvas id="productionChart" width="300" height="100"></canvas>
-                </div>
-                <div id="debug-info" style="font-size: 12px; color: #bdc3c7; margin-top: 10px;"></div>
-            </div>
-        </div>
+                </section>
+
+                <!-- デバッグ情報 -->
+                <section class="debug-section">
+                    <div id="debug-info"></div>
+                </section>
+            </aside>
+        </main>
     </div>
     
     <script type="module" src="src/main.js"></script>
