@@ -34,7 +34,7 @@
 ### 1. 環境セットアップ
 ```bash
 # リポジトリをフォーク
-git clone https://github.com/YOUR_USERNAME/iron-ore-mining-experience.git
+git clone https://github.com/HamadaKoji/iron-ore-mining-experience.git
 cd iron-ore-mining-experience
 
 # 依存関係の確認（Node.js必要）
