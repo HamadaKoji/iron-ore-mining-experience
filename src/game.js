@@ -394,7 +394,7 @@ export class Game {
     }
 
     /**
-     * 生産グラフの更新
+     * 生産グラフの更新（全資源合計対応）
      */
     updateProductionChart() {
         if (!this.chartCtx || this.stats.productionHistory.length < 2) return;
@@ -436,17 +436,21 @@ export class Game {
         // データがない場合は終了
         if (this.stats.productionHistory.length === 0) return;
         
-        // データの最大値を取得
-        const maxIron = Math.max(...this.stats.productionHistory.map(d => d.iron), 1);
+        // 全資源の合計値を計算してデータの最大値を取得
+        const totalProduction = this.stats.productionHistory.map(data => {
+            return (data.iron || 0) + (data.copper || 0) + (data.coal || 0);
+        });
+        const maxTotal = Math.max(...totalProduction, 1);
         
-        // 生産量のライン
-        ctx.strokeStyle = '#e67e22';
-        ctx.lineWidth = 2;
+        // 生産量のライン（全資源合計）
+        ctx.strokeStyle = '#3498db';
+        ctx.lineWidth = 3;
         ctx.beginPath();
         
         this.stats.productionHistory.forEach((data, index) => {
+            const totalValue = (data.iron || 0) + (data.copper || 0) + (data.coal || 0);
             const x = (width / (this.stats.productionHistory.length - 1)) * index;
-            const y = height - (data.iron / maxIron) * height;
+            const y = height - (totalValue / maxTotal) * height;
             
             if (index === 0) {
                 ctx.moveTo(x, y);
@@ -457,12 +461,58 @@ export class Game {
         
         ctx.stroke();
         
-        // 現在値の表示
+        // 個別資源のライン（薄い色で表示）
+        const resourceColors = {
+            iron: '#e67e22',
+            copper: '#d35400', 
+            coal: '#7f8c8d'
+        };
+        
+        Object.keys(resourceColors).forEach(resourceType => {
+            const maxResource = Math.max(...this.stats.productionHistory.map(d => d[resourceType] || 0), 1);
+            
+            ctx.strokeStyle = resourceColors[resourceType];
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            
+            this.stats.productionHistory.forEach((data, index) => {
+                const value = data[resourceType] || 0;
+                const x = (width / (this.stats.productionHistory.length - 1)) * index;
+                const y = height - (value / maxTotal) * height; // 同じスケールを使用
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+        });
+        
+        ctx.globalAlpha = 1.0;
+        
+        // 現在値の表示（全資源合計）
+        const currentTotal = this.resourceCounts.iron + this.resourceCounts.copper + this.resourceCounts.coal;
+        
         ctx.fillStyle = '#ecf0f1';
         ctx.font = '12px Arial';
         ctx.textAlign = 'right';
-        ctx.fillText(`最大: ${maxIron}`, width - 5, 15);
-        ctx.fillText(`現在: ${this.ironCount}`, width - 5, height - 5);
+        ctx.fillText(`最大: ${maxTotal}`, width - 5, 15);
+        ctx.fillText(`合計: ${currentTotal}`, width - 5, height - 5);
+        
+        // 凡例
+        ctx.textAlign = 'left';
+        ctx.font = '10px Arial';
+        ctx.fillStyle = '#3498db';
+        ctx.fillText('━ 合計', 5, 15);
+        ctx.fillStyle = '#e67e22';
+        ctx.fillText('━ 鉄', 5, 30);
+        ctx.fillStyle = '#d35400';
+        ctx.fillText('━ 銅', 5, 45);
+        ctx.fillStyle = '#7f8c8d';
+        ctx.fillText('━ 石炭', 5, 60);
     }
     render() {
         this.renderer.clear();
