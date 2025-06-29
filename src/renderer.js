@@ -1,4 +1,4 @@
-import { GAME_CONFIG, TERRAIN_TYPES, BUILDING_DISPLAY } from './config.js';
+import { GAME_CONFIG, TERRAIN_TYPES, TERRAIN_DISPLAY, BUILDING_DISPLAY } from './config.js';
 
 /**
  * レンダリングクラス
@@ -17,27 +17,31 @@ export class Renderer {
     }
 
     /**
-     * 地形を描画
+     * 地形を描画（複数資源対応）
      * @param {Array<Array<string>>} terrain - 地形データ
      */
     renderTerrain(terrain) {
         for (let y = 0; y < GAME_CONFIG.GRID_HEIGHT; y++) {
             for (let x = 0; x < GAME_CONFIG.GRID_WIDTH; x++) {
-                const isOre = terrain[y][x] === TERRAIN_TYPES.ORE;
-                const color = isOre ? '#8B4513' : '#90EE90';
+                const terrainType = terrain[y][x];
+                const terrainConfig = TERRAIN_DISPLAY[terrainType];
+                
+                // デフォルト値（設定が見つからない場合）
+                const color = terrainConfig ? terrainConfig.color : '#90EE90';
+                const emoji = terrainConfig ? terrainConfig.emoji : '🌱';
                 
                 // 背景色
                 this.ctx.fillStyle = color;
                 this.ctx.fillRect(x * GAME_CONFIG.CELL_SIZE, y * GAME_CONFIG.CELL_SIZE, 
                                 GAME_CONFIG.CELL_SIZE, GAME_CONFIG.CELL_SIZE);
                 
-                // 鉱石エリアに絵文字を表示
-                if (isOre) {
+                // 資源エリアに絵文字を表示
+                if (terrainType !== TERRAIN_TYPES.GRASS) {
                     this.ctx.font = '16px Arial';
                     this.ctx.textAlign = 'center';
                     this.ctx.textBaseline = 'middle';
                     this.ctx.fillText(
-                        '🪨',
+                        emoji,
                         x * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE / 2,
                         y * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE / 2
                     );
@@ -100,7 +104,7 @@ export class Renderer {
     }
 
     /**
-     * アイテムを描画
+     * アイテムを描画（複数資源対応）
      * @param {Map} items - アイテムマップ
      */
     renderItems(items) {
@@ -109,6 +113,25 @@ export class Renderer {
                 // パルス効果のための計算
                 const timeSinceCreated = Date.now() - (item.createdTime || Date.now());
                 const pulseScale = 1 + 0.2 * Math.sin(timeSinceCreated / 200);
+                
+                // 資源タイプに応じた色と絵文字を取得
+                let itemColor = '#FF4500'; // デフォルト（鉄）
+                let itemEmoji = '🔩'; // デフォルト（鉄）
+                
+                switch (item.type) {
+                    case 'iron':
+                        itemColor = '#FF4500';
+                        itemEmoji = '🔩';
+                        break;
+                    case 'copper':
+                        itemColor = '#B87333';
+                        itemEmoji = '🟠';
+                        break;
+                    case 'coal':
+                        itemColor = '#36454F';
+                        itemEmoji = '⚫';
+                        break;
+                }
                 
                 // 背景円を描画
                 this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
@@ -122,18 +145,18 @@ export class Renderer {
                 );
                 this.ctx.fill();
                 
-                // 境界線を追加
-                this.ctx.strokeStyle = '#FF4500';
+                // 境界線を追加（資源タイプ別の色）
+                this.ctx.strokeStyle = itemColor;
                 this.ctx.lineWidth = 2;
                 this.ctx.stroke();
                 
-                // 鉄鉱石の絵文字
+                // 資源の絵文字
                 this.ctx.font = `${18 * pulseScale}px Arial`;
                 this.ctx.textAlign = 'center';
                 this.ctx.textBaseline = 'middle';
                 this.ctx.fillStyle = '#000';
                 this.ctx.fillText(
-                    '🔩',
+                    itemEmoji,
                     item.x * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE / 2,
                     item.y * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE / 2
                 );
