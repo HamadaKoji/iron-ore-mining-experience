@@ -48,7 +48,7 @@ open http://localhost:8000
 
 ```bash
 # プロジェクトディレクトリに移動
-cd /Users/hamada.koji/prj/github/factory-game
+cd /path/to/factory-game
 
 # Pythonサーバーを起動
 python3 -m http.server 8000
@@ -62,7 +62,7 @@ python3 -m http.server 8000
 
 ```bash
 # プロジェクトディレクトリに移動
-cd /Users/hamada.koji/prj/github/factory-game
+cd /path/to/factory-game
 
 # npm開発サーバーを起動
 npm run dev
