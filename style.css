@@ -174,6 +174,76 @@ body {
     gap: 0.5rem;
 }
 
+/* ===== ヒント表示エリア ===== */
+.hint-section {
+    margin-bottom: 1.5rem;
+}
+
+.hint-content {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    border-radius: 12px;
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.hint-content:hover {
+    border-color: rgba(52, 152, 219, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.hint-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.hint-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.hint-text {
+    flex: 1;
+}
+
+.hint-title {
+    font-weight: bold;
+    color: #ecf0f1;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+}
+
+.hint-detail {
+    color: #bdc3c7;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+/* ヒントの状態別スタイル */
+.hint-content.hint-start {
+    border-color: rgba(52, 152, 219, 0.4);
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(155, 89, 182, 0.1));
+}
+
+.hint-content.hint-progress {
+    border-color: rgba(46, 204, 113, 0.4);
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(52, 152, 219, 0.1));
+}
+
+.hint-content.hint-complete {
+    border-color: rgba(243, 156, 18, 0.4);
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(46, 204, 113, 0.1));
+}
+
 /* ===== 統計カード ===== */
 .stats-grid {
     display: grid;

@@ -165,59 +165,69 @@ export class Renderer {
     }
 
     /**
-     * ヒントを描画（改善版）
+     * ヒントをサイドパネルに更新（キャンバス描画なし）
      * @param {number} buildingCount - 建物総数
      * @param {boolean} hasMiners - 採掘機があるか
      * @param {boolean} hasBelts - ベルトがあるか
      * @param {boolean} hasChests - チェストがあるか
      */
-    renderHints(buildingCount, hasMiners, hasBelts, hasChests) {
-        const hintY = GAME_CONFIG.GRID_HEIGHT * GAME_CONFIG.CELL_SIZE - 80; // 画面下部に配置
+    updateHints(buildingCount, hasMiners, hasBelts, hasChests) {
+        const hintDisplay = document.getElementById('hint-display');
+        const hintMessage = document.getElementById('hint-message');
+        
+        if (!hintDisplay || !hintMessage) return;
+        
+        let hintData = null;
         
         // 建物が何もない場合のヒント
         if (buildingCount === 0) {
-            this.ctx.fillStyle = 'rgba(44, 62, 80, 0.9)';
-            this.ctx.fillRect(10, hintY, 350, 60);
-            
-            // 境界線
-            this.ctx.strokeStyle = '#3498db';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(10, hintY, 350, 60);
-            
-            this.ctx.fillStyle = '#ecf0f1';
-            this.ctx.font = 'bold 14px Arial';
-            this.ctx.fillText('🎯 資源エリアに採掘機を設置してみよう！', 20, hintY + 25);
-            this.ctx.font = '12px Arial';
-            this.ctx.fillStyle = '#bdc3c7';
-            this.ctx.fillText('🔩鉄鉱石(茶) 🟠銅鉱石(橙) ⚫石炭(黒) - どれでもOK！', 20, hintY + 45);
+            hintData = {
+                icon: '🎯',
+                title: '資源エリアに採掘機を設置してみよう！',
+                detail: '🔩鉄鉱石(茶) 🟠銅鉱石(橙) ⚫石炭(黒) - どれでもOK！',
+                className: 'hint-start'
+            };
         }
-        
         // 採掘機はあるがベルトがない場合
         else if (hasMiners && !hasBelts && buildingCount < 8) {
-            this.ctx.fillStyle = 'rgba(44, 62, 80, 0.9)';
-            this.ctx.fillRect(10, hintY, 320, 40);
-            
-            this.ctx.strokeStyle = '#27ae60';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(10, hintY, 320, 40);
-            
-            this.ctx.fillStyle = '#ecf0f1';
-            this.ctx.font = 'bold 14px Arial';
-            this.ctx.fillText('➡️ ベルトで運搬ラインを作ろう！', 20, hintY + 25);
+            hintData = {
+                icon: '➡️',
+                title: 'ベルトで運搬ラインを作ろう！',
+                detail: '採掘機の右側からチェストまでベルトを敷設してください',
+                className: 'hint-progress'
+            };
         }
-        
         // ベルトはあるがチェストがない場合
         else if (hasMiners && hasBelts && !hasChests) {
-            this.ctx.fillStyle = 'rgba(44, 62, 80, 0.9)';
-            this.ctx.fillRect(10, hintY, 300, 40);
+            hintData = {
+                icon: '📦',
+                title: 'チェストでアイテムを回収しよう！',
+                detail: 'ベルトの終点にチェストを設置して資源を回収してください',
+                className: 'hint-complete'
+            };
+        }
+        // 完成状態
+        else if (hasMiners && hasBelts && hasChests) {
+            hintData = {
+                icon: '🎉',
+                title: '素晴らしい！工場が稼働中です',
+                detail: '複数の資源ラインを作って生産効率を上げてみましょう！',
+                className: 'hint-complete'
+            };
+        }
+        
+        // ヒント表示を更新
+        if (hintData) {
+            hintMessage.innerHTML = `
+                <div class="hint-icon">${hintData.icon}</div>
+                <div class="hint-text">
+                    <div class="hint-title">${hintData.title}</div>
+                    <div class="hint-detail">${hintData.detail}</div>
+                </div>
+            `;
             
-            this.ctx.strokeStyle = '#f39c12';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(10, hintY, 300, 40);
-            
-            this.ctx.fillStyle = '#ecf0f1';
-            this.ctx.font = 'bold 14px Arial';
-            this.ctx.fillText('📦 チェストでアイテムを回収しよう！', 20, hintY + 25);
+            // CSSクラスを更新
+            hintDisplay.className = `hint-content ${hintData.className}`;
         }
     }
 }

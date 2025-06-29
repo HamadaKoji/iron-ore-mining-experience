@@ -478,7 +478,7 @@ export class Game {
         const hasBelts = this.buildingManager.getBuildingCount(BUILDING_TYPES.BELT) > 0;
         const hasChests = this.buildingManager.getBuildingCount(BUILDING_TYPES.CHEST) > 0;
         
-        this.renderer.renderHints(buildingCount, hasMiners, hasBelts, hasChests);
+        this.renderer.updateHints(buildingCount, hasMiners, hasBelts, hasChests);
     }
 
     /**
