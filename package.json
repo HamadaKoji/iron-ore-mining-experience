@@ -6,6 +6,7 @@
   "main": "src/main.js",
   "scripts": {
     "test": "node tests/run-tests.js",
+    "coverage": "node scripts/coverage-check.js",
     "dev": "python3 -m http.server 8000",
     "start": "python3 -m http.server 8000"
   },
