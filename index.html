@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初めての鉄鉱石採掘体験</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- キービジュアル -->
+        <div class="hero-section">
+            <img src="hero-image.svg" alt="初めての鉄鉱石採掘体験" class="hero-image">
+        </div>
+        
+        <!-- 建物選択UI -->
+        <div class="toolbar">
+            <button id="miner-btn" class="tool-btn active">⛏️ 採掘機</button>
+            <button id="belt-btn" class="tool-btn">➡️ ベルト</button>
+            <button id="chest-btn" class="tool-btn">📦 チェスト</button>
+        </div>
+        
+        <!-- ゲーム画面 -->
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        
+        <!-- 情報表示 -->
+        <div class="info">
+            <div class="controls">
+                <h3>🎮 操作方法</h3>
+                <p><strong>左クリック:</strong> 建物設置 | <strong>右クリック:</strong> 建物削除</p>
+                <p><strong>ツールバー:</strong> 設置する建物を選択</p>
+            </div>
+            
+            <div class="tutorial">
+                <h3>📖 遊び方ガイド</h3>
+                <div class="steps">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>🪨 鉱石を見つけよう</strong>
+                            <p>茶色のエリアに🪨マークがある場所が鉄鉱石です。ここに⛏️採掘機を設置できます。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>⛏️ 採掘機を設置</strong>
+                            <p>「⛏️ 採掘機」を選択して、🪨鉱石エリアをクリック。自動で🔩鉄鉱石の採掘開始！</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <strong>➡️ ベルトで運搬</strong>
+                            <p>「➡️ ベルト」を選択して、⛏️採掘機の右側から一直線に設置。<strong>ベルトがないと🔩アイテムは運ばれません！</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <strong>📦 チェストで回収</strong>
+                            <p>「📦 チェスト」を➡️ベルトの終点に設置。🔩アイテムが自動回収され、鉄鉱石カウンターが増加！</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tips">
+                    <h4>💡 コツ</h4>
+                    <ul>
+                        <li>複数の採掘機を設置して生産量アップ</li>
+                        <li>ベルトは右方向にのみアイテムを運びます</li>
+                        <li>採掘機は鉱石エリア（茶色）にのみ設置可能</li>
+                        <li><strong>採掘機の隣にベルトがないとアイテムは運ばれません</strong></li>
+                        <li>間違えたら右クリックで建物を削除</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="status">
+                <h3>📊 生産状況</h3>
+                <p>🔩 鉄鉱石: <span id="iron-count">0</span> 個</p>
+                <div id="debug-info" style="font-size: 12px; color: #bdc3c7; margin-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
