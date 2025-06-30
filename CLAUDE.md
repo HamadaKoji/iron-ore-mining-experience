@@ -123,3 +123,6 @@ function placeBuilding() { }
 - **CORS エラー**: ローカルでは必ずHTTPサーバー経由で実行（`npm run dev`）
 - **モジュールエラー**: ブラウザがES6モジュール対応か確認
 - **描画問題**: Canvas要素のサイズとCSSサイズの一致を確認
+
+## 🔔 通知設定
+- **YOU MUST**: タスク完了またはユーザーにメッセージを返すときに最後に一度だけ `play /System/Library/Sounds/Funk.aiff vol 2` コマンドを実行して通知する
