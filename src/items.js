@@ -108,7 +108,6 @@ export class ItemManager {
                     const nextBuilding = buildingManager.getBuildingAt(nextX, nextY);
                     
                     if (nextBuilding && (nextBuilding.type === BUILDING_TYPES.BELT || 
-                                       nextBuilding.type === BUILDING_TYPES.CHEST ||
                                        nextBuilding.type === BUILDING_TYPES.SMELTER)) {
                         newX = nextX;
                         newY = nextY;
@@ -132,15 +131,6 @@ export class ItemManager {
                 // 移動先をチェック
                 if (shouldMove) {
                     const targetBuilding = buildingManager.getBuildingAt(newX, newY);
-                    
-                    // チェストに到達したアイテムは回収
-                    if (targetBuilding && targetBuilding.type === BUILDING_TYPES.CHEST) {
-                        // 資源タイプ別にカウント
-                        if (collectedItems.hasOwnProperty(item.type)) {
-                            collectedItems[item.type]++;
-                        }
-                        return; // アイテム消去（回収完了）
-                    }
                     
                     // 製錬炉に到達したアイテムは投入を試みる
                     if (targetBuilding && targetBuilding.type === BUILDING_TYPES.SMELTER) {

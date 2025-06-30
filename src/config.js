@@ -12,7 +12,6 @@ export const GAME_CONFIG = {
 export const BUILDING_TYPES = {
     MINER: 'miner',
     BELT: 'belt',
-    CHEST: 'chest',
     SMELTER: 'smelter'
 };
 
@@ -45,7 +44,6 @@ export const RESOURCE_TYPES = {
 export const BUILDING_DISPLAY = {
     [BUILDING_TYPES.MINER]: { color: '#666', emoji: '⛏️' },
     [BUILDING_TYPES.BELT]: { color: '#4169E1', emoji: '➡️' },
-    [BUILDING_TYPES.CHEST]: { color: '#FFD700', emoji: '📦' },
     [BUILDING_TYPES.SMELTER]: { color: '#d97706', emoji: '🔥' }
 };
 

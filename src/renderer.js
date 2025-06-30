@@ -223,11 +223,10 @@ export class Renderer {
      * @param {number} buildingCount - 建物総数
      * @param {boolean} hasMiners - 採掘機があるか
      * @param {boolean} hasBelts - ベルトがあるか
-     * @param {boolean} hasChests - チェストがあるか
      * @param {boolean} hasSmelters - 製錬炉があるか
      * @param {number} metalPlateCount - 金属板の総数
      */
-    updateHints(buildingCount, hasMiners, hasBelts, hasChests, hasSmelters, metalPlateCount) {
+    updateHints(buildingCount, hasMiners, hasBelts, hasSmelters, metalPlateCount) {
         const hintDisplay = document.getElementById('hint-display');
         const hintMessage = document.getElementById('hint-message');
         
@@ -249,21 +248,12 @@ export class Renderer {
             hintData = {
                 icon: '➡️',
                 title: 'ベルトで運搬ラインを作ろう！',
-                detail: '採掘機の右側からチェストまでベルトを敷設してください',
+                detail: '採掘機の右側から製錬炉までベルトを敷設してください',
                 className: 'hint-progress'
             };
         }
-        // ベルトはあるがチェストがない場合
-        else if (hasMiners && hasBelts && !hasChests) {
-            hintData = {
-                icon: '📦',
-                title: 'チェストでアイテムを回収しよう！',
-                detail: 'ベルトの終点にチェストを設置して資源を回収してください',
-                className: 'hint-complete'
-            };
-        }
         // 製錬炉がまだない場合
-        else if (hasMiners && hasBelts && hasChests && !hasSmelters) {
+        else if (hasMiners && hasBelts && !hasSmelters) {
             hintData = {
                 icon: '🔥',
                 title: '製錬炉で金属板を作ってみよう！',
@@ -281,7 +271,7 @@ export class Renderer {
             };
         }
         // 完成状態
-        else if (hasMiners && hasBelts && hasChests && hasSmelters && metalPlateCount > 0) {
+        else if (hasMiners && hasBelts && hasSmelters && metalPlateCount > 0) {
             hintData = {
                 icon: '🎉',
                 title: '素晴らしい！完全な工場が稼働中です',
