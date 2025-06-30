@@ -50,6 +50,7 @@ body {
 .toolbar {
     display: flex;
     gap: 1rem;
+    align-items: center;
 }
 
 .tool-btn {
@@ -71,6 +72,17 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     background: linear-gradient(145deg, #4a6741, #27ae60);
+}
+
+/* リセットボタン */
+.reset-btn {
+    margin-left: auto;
+    background: linear-gradient(145deg, #c0392b, #e74c3c);
+}
+
+.reset-btn:hover {
+    background: linear-gradient(145deg, #a93226, #c0392b);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
 }
 
 .tool-btn.active {
@@ -488,6 +500,66 @@ body {
     background: rgba(44, 62, 80, 0.8);
     width: 100%;
     height: 120px;
+}
+
+/* ===== 最大効率記録 ===== */
+.max-efficiency-section {
+    margin-top: 1rem;
+}
+
+.max-efficiency-container {
+    background: rgba(44, 62, 80, 0.4);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 2px solid rgba(243, 156, 18, 0.3);
+}
+
+.max-efficiency-card {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.max-efficiency-icon {
+    font-size: 3rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.max-efficiency-content {
+    flex: 1;
+}
+
+.max-efficiency-label {
+    font-size: 0.9rem;
+    color: #95a5a6;
+    margin-bottom: 0.25rem;
+}
+
+.max-efficiency-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #f39c12;
+    line-height: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.max-efficiency-unit {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    margin-top: 0.25rem;
+}
+
+.max-efficiency-date {
+    font-size: 0.8rem;
+    color: #3498db;
+    margin-top: 0.5rem;
+}
+
+.max-efficiency-detail {
+    font-size: 0.75rem;
+    color: #95a5a6;
+    margin-top: 0.25rem;
+    line-height: 1.3;
 }
 
 /* ===== ガイドセクション ===== */

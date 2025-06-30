@@ -54,7 +54,8 @@ export class Game {
             lastStatsUpdate: Date.now(),
             productionHistory: [], // 生産グラフ用
             lastEfficiencyUpdate: Date.now(),
-            efficiencyHistory: [] // 効率グラフ用
+            efficiencyHistory: [], // 効率グラフ用
+            maxBeltEfficiency: this.loadMaxEfficiency() // 最大効率を読み込み
         };
         
         // モジュール初期化
@@ -66,7 +67,88 @@ export class Game {
         this.efficiencyChart = new EfficiencyChart('efficiencyChart');
         
         this.setupEventListeners();
+        this.updateMaxEfficiencyDisplay(); // 初期表示
         this.gameLoop();
+    }
+    
+    /**
+     * ローカルストレージから最大効率を読み込み
+     * @returns {Object} 最大効率データ
+     */
+    loadMaxEfficiency() {
+        const saved = localStorage.getItem('maxBeltEfficiency');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return {
+            value: 0,
+            date: null,
+            metalRate: 0,
+            beltCount: 0
+        };
+    }
+    
+    /**
+     * 最大効率を保存
+     * @param {number} efficiency - 効率値
+     * @param {number} metalRate - 金属板生産レート
+     * @param {number} beltCount - ベルト数
+     */
+    saveMaxEfficiency(efficiency, metalRate, beltCount) {
+        const data = {
+            value: efficiency,
+            date: new Date().toISOString(),
+            metalRate: metalRate,
+            beltCount: beltCount
+        };
+        this.stats.maxBeltEfficiency = data;
+        localStorage.setItem('maxBeltEfficiency', JSON.stringify(data));
+    }
+    
+    /**
+     * ゲームをリセット（建物を全て削除、記録もリセット）
+     */
+    resetGame() {
+        if (confirm('ゲームをリセットしますか？\n全ての建物と最大効率記録が削除されます。')) {
+            // 建物を全て削除
+            this.buildingManager.clear();
+            this.itemManager.clear();
+            
+            // 生産カウントをリセット
+            Object.keys(this.totalProduced).forEach(key => {
+                this.totalProduced[key] = 0;
+            });
+            Object.keys(this.resourceCounts).forEach(key => {
+                this.resourceCounts[key] = 0;
+            });
+            
+            // 統計をリセット
+            Object.keys(this.stats.resourceRates).forEach(key => {
+                this.stats.resourceRates[key] = 0;
+                this.stats.lastResourceCounts[key] = 0;
+            });
+            this.stats.productionHistory = [];
+            this.stats.efficiencyHistory = [];
+            
+            // 最大効率記録をリセット
+            this.stats.maxBeltEfficiency = {
+                value: 0,
+                date: null,
+                metalRate: 0,
+                beltCount: 0
+            };
+            localStorage.removeItem('maxBeltEfficiency');
+            
+            // グラフをクリア
+            this.productionChart.data = {
+                iron_plate: new Array(this.productionChart.maxDataPoints).fill(0),
+                copper_plate: new Array(this.productionChart.maxDataPoints).fill(0)
+            };
+            this.productionChart.draw();
+            
+            this.efficiencyChart.data = new Array(this.efficiencyChart.maxDataPoints).fill(0);
+            this.efficiencyChart.draw();
+        }
     }
 
     /**
@@ -81,6 +163,9 @@ export class Game {
         
         // ベルトボタン（各方向）
         this.setupBeltButtons();
+        
+        // リセットボタン
+        document.getElementById('reset-btn')?.addEventListener('click', () => this.resetGame());
         
         // キャンバスイベント
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
@@ -565,7 +650,16 @@ export class Game {
             } else {
                 efficiencyElement.style.color = '#e74c3c'; // 赤
             }
+            
+            // 最大効率を更新
+            if (currentEfficiency > this.stats.maxBeltEfficiency.value) {
+                this.saveMaxEfficiency(currentEfficiency, totalMetalRate, beltCount);
+                this.updateMaxEfficiencyDisplay();
+            }
         }
+        
+        // 最大効率表示を更新
+        this.updateMaxEfficiencyDisplay();
         
         // 15秒ごとにグラフを更新
         if (timeDiff >= 15000) {
@@ -586,6 +680,33 @@ export class Game {
             this.efficiencyChart.updateData(currentEfficiency);
             
             this.stats.lastEfficiencyUpdate = now;
+        }
+    }
+    
+    /**
+     * 最大効率表示を更新
+     */
+    updateMaxEfficiencyDisplay() {
+        const maxEffElement = document.getElementById('max-efficiency');
+        const maxEffDateElement = document.getElementById('max-efficiency-date');
+        const maxEffDetailElement = document.getElementById('max-efficiency-detail');
+        
+        if (maxEffElement && this.stats.maxBeltEfficiency.value > 0) {
+            maxEffElement.textContent = this.stats.maxBeltEfficiency.value.toFixed(1);
+            
+            if (maxEffDateElement && this.stats.maxBeltEfficiency.date) {
+                const date = new Date(this.stats.maxBeltEfficiency.date);
+                const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                maxEffDateElement.textContent = dateStr;
+            }
+            
+            if (maxEffDetailElement) {
+                maxEffDetailElement.textContent = `金属板${this.stats.maxBeltEfficiency.metalRate}個/分 ÷ ベルト${this.stats.maxBeltEfficiency.beltCount}個`;
+            }
+        } else if (maxEffElement) {
+            maxEffElement.textContent = '--';
+            if (maxEffDateElement) maxEffDateElement.textContent = '';
+            if (maxEffDetailElement) maxEffDetailElement.textContent = 'まだ記録がありません';
         }
     }
 

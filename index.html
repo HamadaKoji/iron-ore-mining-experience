@@ -22,6 +22,7 @@
                         <button id="belt-up-btn" class="tool-btn belt-btn" data-direction="up">⬆️ ベルト</button>
                     </div>
                     <button id="smelter-btn" class="tool-btn">🔥 製錬炉</button>
+                    <button id="reset-btn" class="tool-btn reset-btn">🔄 リセット</button>
                 </div>
             </div>
         </header>
@@ -170,6 +171,23 @@
                         </div>
                         <div class="efficiency-chart">
                             <canvas id="efficiencyChart" width="250" height="120"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 最大効率記録 -->
+                <section class="max-efficiency-section">
+                    <h3 class="section-title">🏆 最大効率記録</h3>
+                    <div class="max-efficiency-container">
+                        <div class="max-efficiency-card">
+                            <div class="max-efficiency-icon">🎖️</div>
+                            <div class="max-efficiency-content">
+                                <div class="max-efficiency-label">ベストスコア</div>
+                                <div class="max-efficiency-value" id="max-efficiency">--</div>
+                                <div class="max-efficiency-unit">個/分/ベルト</div>
+                                <div class="max-efficiency-date" id="max-efficiency-date"></div>
+                                <div class="max-efficiency-detail" id="max-efficiency-detail">まだ記録がありません</div>
+                            </div>
                         </div>
                     </div>
                 </section>
