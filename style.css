@@ -38,12 +38,25 @@ body {
     gap: 2rem;
 }
 
+.header-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
 .game-title {
     font-size: 1.8rem;
     font-weight: 700;
     color: #3498db;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     margin: 0;
+}
+
+.game-subtitle {
+    font-size: 0.9rem;
+    color: #95a5a6;
+    margin: 0;
+    font-style: italic;
 }
 
 /* ===== ツールバー ===== */
@@ -693,32 +706,101 @@ body {
     line-height: 1.3;
 }
 
-/* コツとヒント */
-.guide-tips {
+/* ゲームの目的 */
+.game-objective {
     margin: 1rem 0;
     padding: 1rem;
-    background: rgba(44, 62, 80, 0.4);
-    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
 }
 
-.tip-item {
+.objective-title {
+    color: #ecf0f1;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.objective-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.objective-main {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.5rem 0;
+    padding: 0.5rem;
+    background: rgba(243, 156, 18, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #f39c12;
+}
+
+.objective-icon {
+    font-size: 1.5rem;
+}
+
+.objective-text {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #f39c12;
+}
+
+.objective-formula {
+    background: rgba(44, 62, 80, 0.5);
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.formula-title {
+    font-size: 0.85rem;
+    color: #3498db;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.formula-content {
+    font-size: 0.9rem;
+    color: #ecf0f1;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 0.25rem;
+}
+
+.formula-detail {
+    font-size: 0.8rem;
+    color: #95a5a6;
+    font-family: 'Courier New', monospace;
+}
+
+.objective-tips {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.objective-tips .tip-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
     transition: all 0.2s ease;
 }
 
-.tip-item:hover {
+.objective-tips .tip-item:hover {
     transform: translateX(4px);
 }
 
-.tip-icon {
+.objective-tips .tip-icon {
     font-size: 1rem;
     flex-shrink: 0;
 }
 
-.tip-text {
+.objective-tips .tip-text {
     color: #bdc3c7;
     font-size: 0.8rem;
     line-height: 1.3;
@@ -822,6 +904,10 @@ body {
     .game-title {
         font-size: 1.5rem;
     }
+    
+    .game-subtitle {
+        font-size: 0.8rem;
+    }
 }
 
 @media (max-width: 900px) {
@@ -863,6 +949,11 @@ body {
     
     .game-title {
         font-size: 1.3rem;
+        text-align: center;
+    }
+    
+    .game-subtitle {
+        font-size: 0.75rem;
         text-align: center;
     }
     

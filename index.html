@@ -12,7 +12,10 @@
         <!-- ヘッダー -->
         <header class="game-header">
             <div class="header-content">
-                <h1 class="game-title">🪨 初めての鉄鉱石採掘体験</h1>
+                <div class="header-title-group">
+                    <h1 class="game-title">🪨 初めての鉄鉱石採掘体験</h1>
+                    <p class="game-subtitle">効率的な工場を設計して、最高の生産密度を目指そう！</p>
+                </div>
                 <div class="toolbar">
                     <button id="miner-btn" class="tool-btn active">⛏️ 採掘機</button>
                     <div class="belt-group">
@@ -262,20 +265,37 @@
                             </div>
                         </div>
                         
-                        <!-- コツとヒント -->
-                        <div class="guide-tips">
-                            <h4 class="tips-title">💡 コツ</h4>
-                            <div class="tip-item">
-                                <span class="tip-icon">⚡</span>
-                                <span class="tip-text">各資源を同時に採掘して効率アップ</span>
-                            </div>
-                            <div class="tip-item">
-                                <span class="tip-icon">🔄</span>
-                                <span class="tip-text">長いベルトラインで大量運搬</span>
-                            </div>
-                            <div class="tip-item">
-                                <span class="tip-icon">📊</span>
-                                <span class="tip-text">統計パネルで生産効率を確認</span>
+                        <!-- ゲームの目的 -->
+                        <div class="game-objective">
+                            <h4 class="objective-title">🎯 ゲームの目的</h4>
+                            <div class="objective-content">
+                                <div class="objective-main">
+                                    <span class="objective-icon">🏆</span>
+                                    <span class="objective-text">「生産密度スコア」を最大化しよう！</span>
+                                </div>
+                                <div class="objective-formula">
+                                    <div class="formula-title">📢 スコア計算式</div>
+                                    <div class="formula-content">
+                                        スコア = 金属板生産量 × 稼働効率
+                                    </div>
+                                    <div class="formula-detail">
+                                        稼働効率 = (稼働中の採掘機 × 稼働中の製錬炉) ÷ 総建物数
+                                    </div>
+                                </div>
+                                <div class="objective-tips">
+                                    <div class="tip-item">
+                                        <span class="tip-icon">🏭</span>
+                                        <span class="tip-text">大規模で効率的な工場を構築しよう</span>
+                                    </div>
+                                    <div class="tip-item">
+                                        <span class="tip-icon">✨</span>
+                                        <span class="tip-text">無駄のない設計で高スコアを目指そう</span>
+                                    </div>
+                                    <div class="tip-item">
+                                        <span class="tip-icon">🔄</span>
+                                        <span class="tip-text">リセットして何度でもベストスコアに挑戦！</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
