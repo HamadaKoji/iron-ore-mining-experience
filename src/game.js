@@ -503,9 +503,13 @@ export class Game {
             const totalItems = this.itemManager.getTotalItemCount();
             const itemsOnBelts = this.itemManager.getItemsOnBelts(this.buildingManager);
             
+            // 資源数をカウント
+            const resourceCounts = TerrainGenerator.countResourceAreas(this.terrain);
+            
             debugElement.innerHTML = `
                 建物: 採掘機${minerCount}個, ベルト${beltCount}個, 製錬炉${smelterCount}個<br>
-                マップ上のアイテム: ${totalItems}個 (ベルト上: ${itemsOnBelts}個)
+                マップ上のアイテム: ${totalItems}個 (ベルト上: ${itemsOnBelts}個)<br>
+                資源エリア: 鉄${resourceCounts.iron}個, 銅${resourceCounts.copper}個, 石炭${resourceCounts.coal}個
             `;
         }
     }

@@ -35,16 +35,61 @@ export class Renderer {
                 this.ctx.fillRect(x * GAME_CONFIG.CELL_SIZE, y * GAME_CONFIG.CELL_SIZE, 
                                 GAME_CONFIG.CELL_SIZE, GAME_CONFIG.CELL_SIZE);
                 
-                // 資源エリアに絵文字を表示
+                // 資源エリアにアイコンを表示
                 if (terrainType !== TERRAIN_TYPES.GRASS) {
-                    this.ctx.font = '16px Arial';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.textBaseline = 'middle';
-                    this.ctx.fillText(
-                        emoji,
-                        x * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE / 2,
-                        y * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE / 2
+                    // 資源タイプに応じたアイコンとラベルを取得
+                    let resourceEmoji = '🪨';
+                    let resourceLabel = '';
+                    let labelColor = '#000';
+                    
+                    if (terrainType === TERRAIN_TYPES.IRON_ORE) {
+                        resourceEmoji = '🔩';
+                        resourceLabel = '鉄';
+                        labelColor = '#8B4513';
+                    } else if (terrainType === TERRAIN_TYPES.COPPER_ORE) {
+                        resourceEmoji = '🟠';
+                        resourceLabel = '銅';
+                        labelColor = '#CD853F';
+                    } else if (terrainType === TERRAIN_TYPES.COAL) {
+                        resourceEmoji = '⚫';
+                        resourceLabel = '炭';
+                        labelColor = '#2F2F2F';
+                    }
+                    
+                    // エリアの境界線を描画
+                    this.ctx.strokeStyle = labelColor;
+                    this.ctx.lineWidth = 2;
+                    this.ctx.globalAlpha = 0.3;
+                    this.ctx.strokeRect(
+                        x * GAME_CONFIG.CELL_SIZE + 1,
+                        y * GAME_CONFIG.CELL_SIZE + 1,
+                        GAME_CONFIG.CELL_SIZE - 2,
+                        GAME_CONFIG.CELL_SIZE - 2
                     );
+                    this.ctx.globalAlpha = 1.0;
+                    
+                    // アイコンを描画（左側のセルのみ）
+                    if (x === 0 || terrain[y][x-1] !== terrainType) {
+                        // 半透明の白背景
+                        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                        this.ctx.fillRect(
+                            x * GAME_CONFIG.CELL_SIZE + 2,
+                            y * GAME_CONFIG.CELL_SIZE + 2,
+                            20,
+                            20
+                        );
+                        
+                        // アイコン
+                        this.ctx.font = '14px Arial';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.textBaseline = 'middle';
+                        this.ctx.fillStyle = '#000';
+                        this.ctx.fillText(
+                            resourceEmoji,
+                            x * GAME_CONFIG.CELL_SIZE + 12,
+                            y * GAME_CONFIG.CELL_SIZE + 12
+                        );
+                    }
                 }
             }
         }

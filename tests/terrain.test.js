@@ -12,31 +12,31 @@ framework.test('地形生成 - 正しいサイズ', function() {
     this.assertEqual(terrain[0].length, GAME_CONFIG.GRID_WIDTH, '地形の幅が正しくない');
 });
 
-framework.test('地形生成 - 鉱石確率0%', function() {
-    const terrain = TerrainGenerator.generateTerrain({ iron: 0, copper: 0, coal: 0 });
-    const oreCount = TerrainGenerator.countOreAreas(terrain);
+framework.test('地形生成 - 固定資源数', function() {
+    const terrain = TerrainGenerator.generateTerrain();
+    const resourceCounts = TerrainGenerator.countResourceAreas(terrain);
     
-    this.assertEqual(oreCount, 0, '鉱石確率0%なのに鉱石が生成された');
+    this.assertEqual(resourceCounts.iron, 25, '鉄鉱石の数が25個ではない');
+    this.assertEqual(resourceCounts.copper, 20, '銅鉱石の数が20個ではない');
+    this.assertEqual(resourceCounts.coal, 15, '石炭の数が15個ではない');
 });
 
-framework.test('地形生成 - 鉱石確率100%', function() {
-    // 各資源の確率を合計100%になるように設定
-    const terrain = TerrainGenerator.generateTerrain({ iron: 0.34, copper: 0.33, coal: 0.33 });
+framework.test('地形生成 - 資源総数', function() {
+    const terrain = TerrainGenerator.generateTerrain();
     const oreCount = TerrainGenerator.countOreAreas(terrain);
-    const totalCells = GAME_CONFIG.GRID_WIDTH * GAME_CONFIG.GRID_HEIGHT;
     
-    this.assertEqual(oreCount, totalCells, '鉱石確率100%なのに全セルが鉱石になっていない');
+    this.assertEqual(oreCount, 60, '資源の総数が60個ではない');
 });
 
 framework.test('地形取得 - 有効な座標', function() {
-    const terrain = TerrainGenerator.generateTerrain({ iron: 0, copper: 0, coal: 0 });
+    const terrain = TerrainGenerator.generateTerrain();
     const terrainType = TerrainGenerator.getTerrainAt(terrain, 0, 0);
     
-    this.assertEqual(terrainType, TERRAIN_TYPES.GRASS, '座標(0,0)の地形が取得できない');
+    this.assertNotNull(terrainType, '座標(0,0)の地形が取得できない');
 });
 
 framework.test('地形取得 - 無効な座標', function() {
-    const terrain = TerrainGenerator.generateTerrain({ iron: 0, copper: 0, coal: 0 });
+    const terrain = TerrainGenerator.generateTerrain();
     const terrainType = TerrainGenerator.getTerrainAt(terrain, -1, -1);
     
     this.assertEqual(terrainType, null, '無効な座標でnullが返されない');
