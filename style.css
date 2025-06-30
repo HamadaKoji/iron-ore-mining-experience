@@ -94,6 +94,40 @@ body {
     100% { left: 100%; }
 }
 
+/* ベルト方向選択グループ */
+.belt-direction-group {
+    display: inline-flex;
+    gap: 0.25rem;
+    margin-left: 1rem;
+    padding: 0.25rem;
+    background: rgba(44, 62, 80, 0.4);
+    border-radius: 8px;
+}
+
+.belt-dir-btn {
+    padding: 0.4rem 0.6rem;
+    background: rgba(52, 73, 94, 0.6);
+    color: #bdc3c7;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.belt-dir-btn:hover {
+    background: rgba(52, 73, 94, 0.8);
+    color: #ecf0f1;
+    transform: translateY(-1px);
+}
+
+.belt-dir-btn.active {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: #ecf0f1;
+    border-color: rgba(230, 126, 34, 0.4);
+    box-shadow: 0 2px 10px rgba(230, 126, 34, 0.3);
+}
+
 /* ===== メインコンテンツ ===== */
 .game-main {
     display: grid;
@@ -274,6 +308,16 @@ body {
 .stat-card.coal {
     border-left-color: #2c3e50;
     background: rgba(44, 62, 80, 0.2);
+}
+
+.stat-card.iron-plate {
+    border-left-color: #4682B4;
+    background: rgba(70, 130, 180, 0.15);
+}
+
+.stat-card.copper-plate {
+    border-left-color: #FF8C00;
+    background: rgba(255, 140, 0, 0.15);
 }
 
 .stat-card:hover {

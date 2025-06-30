@@ -1,4 +1,4 @@
-import { GAME_CONFIG, BUILDING_TYPES } from './config.js';
+import { GAME_CONFIG, BUILDING_TYPES, DIRECTIONS } from './config.js';
 
 /**
  * アイテム管理クラス
@@ -48,7 +48,9 @@ export class ItemManager {
         const collectedItems = {
             iron: 0,
             copper: 0,
-            coal: 0
+            coal: 0,
+            iron_plate: 0,
+            copper_plate: 0
         };
         
         this.items.forEach((itemList, key) => {
@@ -59,22 +61,57 @@ export class ItemManager {
                 let newX = x, newY = y;
                 let shouldMove = false;
                 
-                // 採掘機の上のアイテムは、隣がベルトの場合のみ移動
+                // 採掘機の上のアイテムは、隣接するベルトの方向に移動
                 if (currentBuilding && currentBuilding.type === BUILDING_TYPES.MINER) {
-                    const rightBuilding = buildingManager.getBuildingAt(x + 1, y);
-                    if (rightBuilding && rightBuilding.type === BUILDING_TYPES.BELT) {
-                        newX = x + 1;
-                        shouldMove = true;
+                    // 全方向の隣接セルをチェック
+                    const adjacentPositions = [
+                        { x: x + 1, y: y, expectedDir: DIRECTIONS.RIGHT },  // 右側のベルトは右向きである必要
+                        { x: x, y: y + 1, expectedDir: DIRECTIONS.DOWN },   // 下側のベルトは下向きである必要
+                        { x: x - 1, y: y, expectedDir: DIRECTIONS.LEFT },   // 左側のベルトは左向きである必要
+                        { x: x, y: y - 1, expectedDir: DIRECTIONS.UP }      // 上側のベルトは上向きである必要
+                    ];
+                    
+                    for (const pos of adjacentPositions) {
+                        const adjacentBuilding = buildingManager.getBuildingAt(pos.x, pos.y);
+                        if (adjacentBuilding && adjacentBuilding.type === BUILDING_TYPES.BELT) {
+                            // ベルトが採掘機の方を向いているかチェック
+                            if (adjacentBuilding.direction === pos.expectedDir) {
+                                newX = pos.x;
+                                newY = pos.y;
+                                shouldMove = true;
+                                break;
+                            }
+                        }
                     }
                 }
-                // ベルトの上のアイテムは条件付きで右に移動
+                // ベルトの上のアイテムは方向に従って移動
                 else if (currentBuilding && currentBuilding.type === BUILDING_TYPES.BELT) {
-                    const nextX = x + 1;
-                    const nextBuilding = buildingManager.getBuildingAt(nextX, y);
+                    const direction = currentBuilding.direction || DIRECTIONS.RIGHT;
+                    let nextX = x;
+                    let nextY = y;
+                    
+                    switch (direction) {
+                        case DIRECTIONS.RIGHT:
+                            nextX = x + 1;
+                            break;
+                        case DIRECTIONS.DOWN:
+                            nextY = y + 1;
+                            break;
+                        case DIRECTIONS.LEFT:
+                            nextX = x - 1;
+                            break;
+                        case DIRECTIONS.UP:
+                            nextY = y - 1;
+                            break;
+                    }
+                    
+                    const nextBuilding = buildingManager.getBuildingAt(nextX, nextY);
                     
                     if (nextBuilding && (nextBuilding.type === BUILDING_TYPES.BELT || 
-                                       nextBuilding.type === BUILDING_TYPES.CHEST)) {
+                                       nextBuilding.type === BUILDING_TYPES.CHEST ||
+                                       nextBuilding.type === BUILDING_TYPES.SMELTER)) {
                         newX = nextX;
+                        newY = nextY;
                         shouldMove = true;
                     }
                 }
@@ -85,8 +122,10 @@ export class ItemManager {
                 }
                 
                 // 境界チェック
-                if (newX >= GAME_CONFIG.GRID_WIDTH) {
+                if (newX < 0 || newX >= GAME_CONFIG.GRID_WIDTH || 
+                    newY < 0 || newY >= GAME_CONFIG.GRID_HEIGHT) {
                     newX = x;
+                    newY = y;
                     shouldMove = false;
                 }
                 
@@ -101,6 +140,19 @@ export class ItemManager {
                             collectedItems[item.type]++;
                         }
                         return; // アイテム消去（回収完了）
+                    }
+                    
+                    // 製錬炉に到達したアイテムは投入を試みる
+                    if (targetBuilding && targetBuilding.type === BUILDING_TYPES.SMELTER) {
+                        if (buildingManager.canSmelterReceiveItem(targetBuilding, item.type)) {
+                            buildingManager.addItemToSmelter(targetBuilding, item.type);
+                            return; // アイテム消去（投入完了）
+                        } else {
+                            // 受け取れない場合は移動しない
+                            newX = x;
+                            newY = y;
+                            shouldMove = false;
+                        }
                     }
                 }
                 

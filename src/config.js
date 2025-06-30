@@ -5,13 +5,23 @@ export const GAME_CONFIG = {
     CELL_SIZE: 32,
     MINING_INTERVAL: 120, // フレーム数（2秒）
     BELT_MOVE_INTERVAL: 30, // フレーム数（0.5秒）
+    SMELTING_TIME: 240, // フレーム数（4秒）
 };
 
 // 建物タイプ
 export const BUILDING_TYPES = {
     MINER: 'miner',
     BELT: 'belt',
-    CHEST: 'chest'
+    CHEST: 'chest',
+    SMELTER: 'smelter'
+};
+
+// ベルトの方向
+export const DIRECTIONS = {
+    RIGHT: 'right',
+    DOWN: 'down',
+    LEFT: 'left',
+    UP: 'up'
 };
 
 // 地形タイプ
@@ -26,14 +36,25 @@ export const TERRAIN_TYPES = {
 export const RESOURCE_TYPES = {
     IRON: 'iron',
     COPPER: 'copper',
-    COAL: 'coal'
+    COAL: 'coal',
+    IRON_PLATE: 'iron_plate',
+    COPPER_PLATE: 'copper_plate'
 };
 
 // 建物の表示設定
 export const BUILDING_DISPLAY = {
     [BUILDING_TYPES.MINER]: { color: '#666', emoji: '⛏️' },
     [BUILDING_TYPES.BELT]: { color: '#4169E1', emoji: '➡️' },
-    [BUILDING_TYPES.CHEST]: { color: '#FFD700', emoji: '📦' }
+    [BUILDING_TYPES.CHEST]: { color: '#FFD700', emoji: '📦' },
+    [BUILDING_TYPES.SMELTER]: { color: '#d97706', emoji: '🔥' }
+};
+
+// 方向別の表示設定
+export const DIRECTION_DISPLAY = {
+    [DIRECTIONS.RIGHT]: '➡️',
+    [DIRECTIONS.DOWN]: '⬇️',
+    [DIRECTIONS.LEFT]: '⬅️',
+    [DIRECTIONS.UP]: '⬆️'
 };
 
 // 地形の表示設定
@@ -48,5 +69,7 @@ export const TERRAIN_DISPLAY = {
 export const RESOURCE_DISPLAY = {
     [RESOURCE_TYPES.IRON]: { color: '#708090', emoji: '🔩', name: '鉄鉱石' },
     [RESOURCE_TYPES.COPPER]: { color: '#B87333', emoji: '🟠', name: '銅鉱石' },
-    [RESOURCE_TYPES.COAL]: { color: '#36454F', emoji: '⚫', name: '石炭' }
+    [RESOURCE_TYPES.COAL]: { color: '#36454F', emoji: '⚫', name: '石炭' },
+    [RESOURCE_TYPES.IRON_PLATE]: { color: '#4682B4', emoji: '🟦', name: '鉄板' },
+    [RESOURCE_TYPES.COPPER_PLATE]: { color: '#FF8C00', emoji: '🟧', name: '銅板' }
 };

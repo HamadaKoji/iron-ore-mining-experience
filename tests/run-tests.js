@@ -1,6 +1,7 @@
 import { terrainTests } from './terrain.test.js';
 import { buildingTests } from './buildings.test.js';
 import { itemTests } from './items.test.js';
+import { runSmelterTests } from './smelter.test.js';
 
 /**
  * 全テストを実行
@@ -20,10 +21,17 @@ async function runAllTests() {
     console.log('='.repeat(50));
     await itemTests.runAll();
     
+    console.log('\n🔥 製錬炉テスト');
+    console.log('='.repeat(50));
+    const smelterResults = await runSmelterTests();
+    
     // 全体の結果
-    const totalPassed = terrainTests.results.passed + buildingTests.results.passed + itemTests.results.passed;
-    const totalFailed = terrainTests.results.failed + buildingTests.results.failed + itemTests.results.failed;
-    const totalTests = terrainTests.results.total + buildingTests.results.total + itemTests.results.total;
+    const totalPassed = terrainTests.results.passed + buildingTests.results.passed + 
+                       itemTests.results.passed + smelterResults.passed;
+    const totalFailed = terrainTests.results.failed + buildingTests.results.failed + 
+                       itemTests.results.failed + smelterResults.failed;
+    const totalTests = terrainTests.results.total + buildingTests.results.total + 
+                      itemTests.results.total + smelterResults.total;
     
     console.log('\n' + '='.repeat(60));
     console.log('🎯 全体テスト結果');

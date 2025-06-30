@@ -16,6 +16,13 @@
                     <button id="miner-btn" class="tool-btn active">⛏️ 採掘機</button>
                     <button id="belt-btn" class="tool-btn">➡️ ベルト</button>
                     <button id="chest-btn" class="tool-btn">📦 チェスト</button>
+                    <button id="smelter-btn" class="tool-btn">🔥 製錬炉</button>
+                    <div class="belt-direction-group">
+                        <button id="belt-right-btn" class="belt-dir-btn active">➡️</button>
+                        <button id="belt-down-btn" class="belt-dir-btn">⬇️</button>
+                        <button id="belt-left-btn" class="belt-dir-btn">⬅️</button>
+                        <button id="belt-up-btn" class="belt-dir-btn">⬆️</button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -57,6 +64,22 @@
                                 <div class="stat-rate" id="coal-rate">0/分</div>
                             </div>
                         </div>
+                        <div class="stat-card iron-plate">
+                            <div class="stat-icon">🟦</div>
+                            <div class="stat-info">
+                                <div class="stat-label">鉄板</div>
+                                <div class="stat-value" id="iron-plate-count">0</div>
+                                <div class="stat-rate" id="iron-plate-rate">0/分</div>
+                            </div>
+                        </div>
+                        <div class="stat-card copper-plate">
+                            <div class="stat-icon">🟧</div>
+                            <div class="stat-info">
+                                <div class="stat-label">銅板</div>
+                                <div class="stat-value" id="copper-plate-count">0</div>
+                                <div class="stat-rate" id="copper-plate-rate">0/分</div>
+                            </div>
+                        </div>
                         <div class="stat-card">
                             <div class="stat-icon">⛏️</div>
                             <div class="stat-info">
@@ -79,6 +102,14 @@
                                 <div class="stat-label">チェスト</div>
                                 <div class="stat-value" id="chest-count">0</div>
                                 <div class="stat-rate" id="chest-capacity">0% 満杯</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-info">
+                                <div class="stat-label">製錬炉</div>
+                                <div class="stat-value" id="smelter-count">0</div>
+                                <div class="stat-rate" id="smelter-efficiency">0% 稼働</div>
                             </div>
                         </div>
                     </div>
@@ -127,21 +158,21 @@
                                     <span class="resource-icon">🔩</span>
                                     <div class="resource-info">
                                         <span class="resource-name">鉄鉱石</span>
-                                        <span class="resource-desc">茶色エリア - 基本建設資源</span>
+                                        <span class="resource-desc">茶色エリア - 鉄板の原料</span>
                                     </div>
                                 </div>
                                 <div class="resource-type">
                                     <span class="resource-icon">🟠</span>
                                     <div class="resource-info">
                                         <span class="resource-name">銅鉱石</span>
-                                        <span class="resource-desc">オレンジエリア - 電子部品用</span>
+                                        <span class="resource-desc">オレンジエリア - 銅板の原料</span>
                                     </div>
                                 </div>
                                 <div class="resource-type">
                                     <span class="resource-icon">⚫</span>
                                     <div class="resource-info">
                                         <span class="resource-name">石炭</span>
-                                        <span class="resource-desc">黒色エリア - エネルギー資源</span>
+                                        <span class="resource-desc">黒色エリア - 製錬炉の燃料</span>
                                     </div>
                                 </div>
                             </div>
@@ -156,7 +187,7 @@
                             </div>
                             <div class="step-mini">
                                 <span class="step-num">2</span>
-                                <span class="step-text">➡️ベルトで運搬ルートを作成</span>
+                                <span class="step-text">➡️⬇️⬅️⬆️ベルトで運搬ルートを作成</span>
                             </div>
                             <div class="step-mini">
                                 <span class="step-num">3</span>
@@ -164,6 +195,10 @@
                             </div>
                             <div class="step-mini">
                                 <span class="step-num">4</span>
+                                <span class="step-text">🔥製錬炉で金属板を生産</span>
+                            </div>
+                            <div class="step-mini">
+                                <span class="step-num">5</span>
                                 <span class="step-text">🏭複数ラインで生産効率UP</span>
                             </div>
                         </div>

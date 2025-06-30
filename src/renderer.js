@@ -1,4 +1,4 @@
-import { GAME_CONFIG, TERRAIN_TYPES, TERRAIN_DISPLAY, BUILDING_DISPLAY } from './config.js';
+import { GAME_CONFIG, TERRAIN_TYPES, TERRAIN_DISPLAY, BUILDING_DISPLAY, BUILDING_TYPES, DIRECTION_DISPLAY } from './config.js';
 
 /**
  * レンダリングクラス
@@ -95,11 +95,57 @@ export class Renderer {
             this.ctx.font = '20px Arial';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
+            
+            // ベルトの場合は方向に応じた絵文字を表示
+            let emoji = display.emoji;
+            if (building.type === BUILDING_TYPES.BELT && building.direction) {
+                emoji = DIRECTION_DISPLAY[building.direction] || display.emoji;
+            }
+            
             this.ctx.fillText(
-                display.emoji,
+                emoji,
                 building.x * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE / 2,
                 building.y * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE / 2
             );
+            
+            // 製錬炉の追加表示
+            if (building.type === 'smelter') {
+                // 製錬進行状況バー
+                if (building.smeltingProgress > 0) {
+                    const progress = building.smeltingProgress / GAME_CONFIG.SMELTING_TIME;
+                    const barWidth = (GAME_CONFIG.CELL_SIZE - 8) * progress;
+                    
+                    // 背景バー
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                    this.ctx.fillRect(
+                        building.x * GAME_CONFIG.CELL_SIZE + 4,
+                        building.y * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE - 8,
+                        GAME_CONFIG.CELL_SIZE - 8,
+                        4
+                    );
+                    
+                    // 進行バー
+                    this.ctx.fillStyle = '#FFA500';
+                    this.ctx.fillRect(
+                        building.x * GAME_CONFIG.CELL_SIZE + 4,
+                        building.y * GAME_CONFIG.CELL_SIZE + GAME_CONFIG.CELL_SIZE - 8,
+                        barWidth,
+                        4
+                    );
+                }
+                
+                // 燃料状態表示
+                if (!building.inputCoal && !building.smeltingProgress) {
+                    // 燃料なし表示（グレーアウト）
+                    this.ctx.fillStyle = 'rgba(128, 128, 128, 0.5)';
+                    this.ctx.fillRect(
+                        building.x * GAME_CONFIG.CELL_SIZE + 2,
+                        building.y * GAME_CONFIG.CELL_SIZE + 2,
+                        GAME_CONFIG.CELL_SIZE - 4,
+                        GAME_CONFIG.CELL_SIZE - 4
+                    );
+                }
+            }
         });
     }
 
@@ -130,6 +176,14 @@ export class Renderer {
                     case 'coal':
                         itemColor = '#36454F';
                         itemEmoji = '⚫';
+                        break;
+                    case 'iron_plate':
+                        itemColor = '#4682B4';
+                        itemEmoji = '🟦';
+                        break;
+                    case 'copper_plate':
+                        itemColor = '#FF8C00';
+                        itemEmoji = '🟧';
                         break;
                 }
                 
@@ -170,8 +224,10 @@ export class Renderer {
      * @param {boolean} hasMiners - 採掘機があるか
      * @param {boolean} hasBelts - ベルトがあるか
      * @param {boolean} hasChests - チェストがあるか
+     * @param {boolean} hasSmelters - 製錬炉があるか
+     * @param {number} metalPlateCount - 金属板の総数
      */
-    updateHints(buildingCount, hasMiners, hasBelts, hasChests) {
+    updateHints(buildingCount, hasMiners, hasBelts, hasChests, hasSmelters, metalPlateCount) {
         const hintDisplay = document.getElementById('hint-display');
         const hintMessage = document.getElementById('hint-message');
         
@@ -206,12 +262,30 @@ export class Renderer {
                 className: 'hint-complete'
             };
         }
+        // 製錬炉がまだない場合
+        else if (hasMiners && hasBelts && hasChests && !hasSmelters) {
+            hintData = {
+                icon: '🔥',
+                title: '製錬炉で金属板を作ってみよう！',
+                detail: '石炭を採掘して、鉱石と一緒に製錬炉へ運びましょう',
+                className: 'hint-progress'
+            };
+        }
+        // 製錬炉はあるが金属板がまだない場合
+        else if (hasSmelters && metalPlateCount === 0) {
+            hintData = {
+                icon: '⚡',
+                title: '製錬炉に材料を供給しよう！',
+                detail: '鉱石と石炭の両方が必要です。石炭の採掘も忘れずに！',
+                className: 'hint-progress'
+            };
+        }
         // 完成状態
-        else if (hasMiners && hasBelts && hasChests) {
+        else if (hasMiners && hasBelts && hasChests && hasSmelters && metalPlateCount > 0) {
             hintData = {
                 icon: '🎉',
-                title: '素晴らしい！工場が稼働中です',
-                detail: '複数の資源ラインを作って生産効率を上げてみましょう！',
+                title: '素晴らしい！完全な工場が稼働中です',
+                detail: '金属板の生産効率を上げて、より高度な工場を目指しましょう！',
                 className: 'hint-complete'
             };
         }

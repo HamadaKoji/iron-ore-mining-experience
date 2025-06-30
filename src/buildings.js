@@ -1,4 +1,4 @@
-import { BUILDING_TYPES, TERRAIN_TYPES } from './config.js';
+import { BUILDING_TYPES, TERRAIN_TYPES, DIRECTIONS } from './config.js';
 import { TerrainGenerator } from './terrain.js';
 
 /**
@@ -15,9 +15,10 @@ export class BuildingManager {
      * @param {number} y - Y座標
      * @param {string} type - 建物タイプ
      * @param {Array<Array<string>>} terrain - 地形データ
+     * @param {string} direction - ベルトの方向（ベルトの場合のみ使用）
      * @returns {boolean} 設置成功かどうか
      */
-    placeBuilding(x, y, type, terrain) {
+    placeBuilding(x, y, type, terrain, direction = DIRECTIONS.RIGHT) {
         const key = `${x},${y}`;
         
         // 既に建物がある場合は設置不可
@@ -30,6 +31,11 @@ export class BuildingManager {
             return false;
         }
 
+        // 製錬炉は草地にのみ設置可能
+        if (type === BUILDING_TYPES.SMELTER && terrain[y][x] !== TERRAIN_TYPES.GRASS) {
+            return false;
+        }
+
         const building = {
             type: type,
             x: x,
@@ -37,8 +43,18 @@ export class BuildingManager {
             timer: 0,
             // 採掘機の場合、採掘する資源タイプを記録
             resourceType: type === BUILDING_TYPES.MINER ? 
-                TerrainGenerator.getResourceType(terrain[y][x]) : null
+                TerrainGenerator.getResourceType(terrain[y][x]) : null,
+            // ベルトの場合、方向を記録
+            direction: type === BUILDING_TYPES.BELT ? direction : null
         };
+
+        // 製錬炉の場合、追加の状態を初期化
+        if (type === BUILDING_TYPES.SMELTER) {
+            building.inputOre = null;      // 入力鉱石
+            building.inputCoal = null;     // 入力石炭
+            building.smeltingProgress = 0; // 製錬進行度
+            building.outputBuffer = null;  // 出力バッファ
+        }
 
         this.buildings.set(key, building);
         return true;
@@ -95,11 +111,83 @@ export class BuildingManager {
      * 指定位置に隣接するベルトがあるかチェック
      * @param {number} x - X座標
      * @param {number} y - Y座標
+     * @param {string} direction - チェックする方向（オプション）
      * @returns {boolean} 隣接ベルトの有無
      */
-    hasAdjacentBelt(x, y) {
-        // 右隣にベルトがあるかチェック（採掘機は右方向にアイテムを出力）
-        const rightBuilding = this.getBuildingAt(x + 1, y);
-        return rightBuilding && rightBuilding.type === BUILDING_TYPES.BELT;
+    hasAdjacentBelt(x, y, direction = DIRECTIONS.RIGHT) {
+        let adjacentX = x;
+        let adjacentY = y;
+        
+        switch (direction) {
+            case DIRECTIONS.RIGHT:
+                adjacentX = x + 1;
+                break;
+            case DIRECTIONS.DOWN:
+                adjacentY = y + 1;
+                break;
+            case DIRECTIONS.LEFT:
+                adjacentX = x - 1;
+                break;
+            case DIRECTIONS.UP:
+                adjacentY = y - 1;
+                break;
+        }
+        
+        const adjacentBuilding = this.getBuildingAt(adjacentX, adjacentY);
+        return adjacentBuilding && adjacentBuilding.type === BUILDING_TYPES.BELT;
+    }
+
+    /**
+     * 製錬炉がアイテムを受け取れるかチェック
+     * @param {Object} smelter - 製錬炉建物オブジェクト
+     * @param {string} itemType - アイテムタイプ
+     * @returns {boolean} 受け取り可能かどうか
+     */
+    canSmelterReceiveItem(smelter, itemType) {
+        if (smelter.type !== BUILDING_TYPES.SMELTER) {
+            return false;
+        }
+
+        // 石炭の場合
+        if (itemType === 'coal' && !smelter.inputCoal) {
+            return true;
+        }
+
+        // 鉱石の場合（鉄または銅）
+        if ((itemType === 'iron' || itemType === 'copper') && !smelter.inputOre) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 製錬炉にアイテムを投入
+     * @param {Object} smelter - 製錬炉建物オブジェクト
+     * @param {string} itemType - アイテムタイプ
+     */
+    addItemToSmelter(smelter, itemType) {
+        if (itemType === 'coal') {
+            smelter.inputCoal = itemType;
+        } else if (itemType === 'iron' || itemType === 'copper') {
+            smelter.inputOre = itemType;
+        }
+    }
+
+    /**
+     * 製錬炉の稼働率を計算
+     * @returns {number} 稼働率（0-100）
+     */
+    getSmelterUtilization() {
+        const smelters = Array.from(this.buildings.values())
+            .filter(building => building.type === BUILDING_TYPES.SMELTER);
+        
+        if (smelters.length === 0) return 0;
+
+        const workingSmelters = smelters.filter(smelter => 
+            smelter.smeltingProgress > 0 || smelter.outputBuffer !== null
+        ).length;
+
+        return Math.round((workingSmelters / smelters.length) * 100);
     }
 }

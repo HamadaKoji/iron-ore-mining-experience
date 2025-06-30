@@ -1,4 +1,4 @@
-import { GAME_CONFIG, BUILDING_TYPES, RESOURCE_TYPES } from './config.js';
+import { GAME_CONFIG, BUILDING_TYPES, RESOURCE_TYPES, DIRECTIONS } from './config.js';
 import { TerrainGenerator } from './terrain.js';
 import { BuildingManager } from './buildings.js';
 import { ItemManager } from './items.js';
@@ -11,12 +11,24 @@ export class Game {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.selectedTool = BUILDING_TYPES.MINER;
+        this.selectedBeltDirection = DIRECTIONS.RIGHT;
         
         // 各資源のカウント
         this.resourceCounts = {
             iron: 0,
             copper: 0,
-            coal: 0
+            coal: 0,
+            iron_plate: 0,
+            copper_plate: 0
+        };
+        
+        // 総生産量のカウント
+        this.totalProduced = {
+            iron: 0,
+            copper: 0,
+            coal: 0,
+            iron_plate: 0,
+            copper_plate: 0
         };
         
         this.frameCounter = 0;
@@ -26,12 +38,16 @@ export class Game {
             resourceRates: {
                 iron: 0,
                 copper: 0,
-                coal: 0
+                coal: 0,
+                iron_plate: 0,
+                copper_plate: 0
             },
             lastResourceCounts: {
                 iron: 0,
                 copper: 0,
-                coal: 0
+                coal: 0,
+                iron_plate: 0,
+                copper_plate: 0
             },
             lastStatsUpdate: Date.now(),
             productionHistory: [] // 生産グラフ用
@@ -59,6 +75,18 @@ export class Game {
             () => this.selectTool(BUILDING_TYPES.BELT));
         document.getElementById('chest-btn').addEventListener('click', 
             () => this.selectTool(BUILDING_TYPES.CHEST));
+        document.getElementById('smelter-btn')?.addEventListener('click', 
+            () => this.selectTool(BUILDING_TYPES.SMELTER));
+        
+        // ベルト方向ボタン
+        document.getElementById('belt-right-btn')?.addEventListener('click', 
+            () => this.selectBeltDirection(DIRECTIONS.RIGHT));
+        document.getElementById('belt-down-btn')?.addEventListener('click', 
+            () => this.selectBeltDirection(DIRECTIONS.DOWN));
+        document.getElementById('belt-left-btn')?.addEventListener('click', 
+            () => this.selectBeltDirection(DIRECTIONS.LEFT));
+        document.getElementById('belt-up-btn')?.addEventListener('click', 
+            () => this.selectBeltDirection(DIRECTIONS.UP));
         
         // キャンバスイベント
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
@@ -101,6 +129,27 @@ export class Game {
     }
 
     /**
+     * ベルト方向を選択
+     * @param {string} direction - 選択する方向
+     */
+    selectBeltDirection(direction) {
+        this.selectedBeltDirection = direction;
+        
+        // ベルト方向ボタンの状態を更新
+        document.querySelectorAll('.belt-dir-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const activeBtn = document.getElementById(`belt-${direction}-btn`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+        
+        // ベルトツールを選択
+        this.selectTool(BUILDING_TYPES.BELT);
+    }
+
+    /**
      * カーソルスタイルを更新
      * @param {string} tool - 選択されたツール
      */
@@ -140,7 +189,8 @@ export class Game {
     handleClick(e) {
         const { x, y } = this.getGridPosition(e.clientX, e.clientY);
         if (x >= 0 && x < GAME_CONFIG.GRID_WIDTH && y >= 0 && y < GAME_CONFIG.GRID_HEIGHT) {
-            this.buildingManager.placeBuilding(x, y, this.selectedTool, this.terrain);
+            const direction = this.selectedTool === BUILDING_TYPES.BELT ? this.selectedBeltDirection : null;
+            this.buildingManager.placeBuilding(x, y, this.selectedTool, this.terrain, direction);
         }
     }
 
@@ -254,6 +304,62 @@ export class Game {
                     // 建物に記録された資源タイプに基づいてアイテムを生成
                     const resourceType = building.resourceType || 'iron';
                     this.itemManager.addItem(building.x, building.y, resourceType);
+                    
+                    // 総生産量を更新
+                    if (this.totalProduced.hasOwnProperty(resourceType)) {
+                        this.totalProduced[resourceType]++;
+                    }
+                }
+            }
+            // 製錬炉の処理
+            else if (building.type === BUILDING_TYPES.SMELTER) {
+                // 材料が揃っていて、出力バッファが空の場合、製錬開始
+                if (building.inputOre && building.inputCoal && !building.outputBuffer && building.smeltingProgress === 0) {
+                    building.smeltingProgress = 1;
+                }
+                
+                // 製錬中の処理
+                if (building.smeltingProgress > 0) {
+                    building.smeltingProgress++;
+                    
+                    // 製錬完了
+                    if (building.smeltingProgress >= GAME_CONFIG.SMELTING_TIME) {
+                        // 出力アイテムを決定
+                        if (building.inputOre === 'iron') {
+                            building.outputBuffer = 'iron_plate';
+                            // 総生産量を更新
+                            this.totalProduced.iron_plate++;
+                        } else if (building.inputOre === 'copper') {
+                            building.outputBuffer = 'copper_plate';
+                            // 総生産量を更新
+                            this.totalProduced.copper_plate++;
+                        }
+                        
+                        building.inputOre = null;
+                        building.inputCoal = null;
+                        building.smeltingProgress = 0;
+                    }
+                }
+                
+                // 出力バッファにアイテムがあり、隣接するベルトがある場合、アイテムを排出
+                if (building.outputBuffer) {
+                    // 全方向の隣接ベルトをチェック
+                    const adjacentPositions = [
+                        { x: building.x + 1, y: building.y, dir: DIRECTIONS.RIGHT },
+                        { x: building.x, y: building.y + 1, dir: DIRECTIONS.DOWN },
+                        { x: building.x - 1, y: building.y, dir: DIRECTIONS.LEFT },
+                        { x: building.x, y: building.y - 1, dir: DIRECTIONS.UP }
+                    ];
+                    
+                    for (const pos of adjacentPositions) {
+                        const adjacentBuilding = this.buildingManager.getBuildingAt(pos.x, pos.y);
+                        if (adjacentBuilding && adjacentBuilding.type === BUILDING_TYPES.BELT && 
+                            adjacentBuilding.direction === pos.dir) {
+                            this.itemManager.addItem(pos.x, pos.y, building.outputBuffer);
+                            building.outputBuffer = null;
+                            break;
+                        }
+                    }
                 }
             }
         });
@@ -280,25 +386,29 @@ export class Game {
      * UI更新
      */
     updateUI() {
-        // 各資源の統計更新
-        document.getElementById('iron-count').textContent = this.resourceCounts.iron;
-        document.getElementById('copper-count').textContent = this.resourceCounts.copper;
-        document.getElementById('coal-count').textContent = this.resourceCounts.coal;
+        // 各資源の統計更新（総生産量を表示）
+        document.getElementById('iron-count').textContent = this.totalProduced.iron;
+        document.getElementById('copper-count').textContent = this.totalProduced.copper;
+        document.getElementById('coal-count').textContent = this.totalProduced.coal;
+        document.getElementById('iron-plate-count').textContent = this.totalProduced.iron_plate;
+        document.getElementById('copper-plate-count').textContent = this.totalProduced.copper_plate;
         
         // 建物数の更新
         const minerCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.MINER);
         const beltCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.BELT);
         const chestCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.CHEST);
+        const smelterCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.SMELTER);
         
         document.getElementById('miner-count').textContent = minerCount;
         document.getElementById('belt-count').textContent = beltCount;
         document.getElementById('chest-count').textContent = chestCount;
+        document.getElementById('smelter-count').textContent = smelterCount;
         
         // 統計情報の更新
         this.updateStats();
         
         // 効率情報の更新
-        this.updateEfficiencyStats(minerCount, beltCount, chestCount);
+        this.updateEfficiencyStats(minerCount, beltCount, chestCount, smelterCount);
         
         const debugElement = document.getElementById('debug-info');
         if (debugElement) {
@@ -322,8 +432,8 @@ export class Game {
         // 1秒ごとに統計を更新
         if (timeDiff >= 1000) {
             // 各資源の生産レートを計算
-            Object.keys(this.resourceCounts).forEach(resourceType => {
-                const currentCount = this.resourceCounts[resourceType];
+            Object.keys(this.totalProduced).forEach(resourceType => {
+                const currentCount = this.totalProduced[resourceType];
                 const lastCount = this.stats.lastResourceCounts[resourceType];
                 const diff = currentCount - lastCount;
                 const perSecond = diff / (timeDiff / 1000);
@@ -342,7 +452,7 @@ export class Game {
             // 履歴に追加（最大60個まで保持）
             this.stats.productionHistory.push({
                 time: now,
-                ...this.resourceCounts,
+                ...this.totalProduced,
                 rates: {...this.stats.resourceRates}
             });
             
@@ -360,14 +470,30 @@ export class Game {
     /**
      * 効率統計の更新
      */
-    updateEfficiencyStats(minerCount, beltCount, chestCount) {
+    updateEfficiencyStats(minerCount, beltCount, chestCount, smelterCount) {
         // 採掘機効率（実際に採掘している採掘機の割合）
         let activeMinerCount = 0;
         this.buildingManager.getAllBuildings().forEach(building => {
             if (building.type === BUILDING_TYPES.MINER) {
-                // 隣にベルトがあるかチェック
-                const hasAdjacentBelt = this.buildingManager.hasAdjacentBelt(building.x, building.y);
-                if (hasAdjacentBelt) activeMinerCount++;
+                // 全方向の隣接ベルトをチェック
+                const adjacentPositions = [
+                    { x: building.x + 1, y: building.y, dir: DIRECTIONS.RIGHT },
+                    { x: building.x, y: building.y + 1, dir: DIRECTIONS.DOWN },
+                    { x: building.x - 1, y: building.y, dir: DIRECTIONS.LEFT },
+                    { x: building.x, y: building.y - 1, dir: DIRECTIONS.UP }
+                ];
+                
+                let hasProperBelt = false;
+                for (const pos of adjacentPositions) {
+                    const adjacentBuilding = this.buildingManager.getBuildingAt(pos.x, pos.y);
+                    if (adjacentBuilding && adjacentBuilding.type === BUILDING_TYPES.BELT && 
+                        adjacentBuilding.direction === pos.dir) {
+                        hasProperBelt = true;
+                        break;
+                    }
+                }
+                
+                if (hasProperBelt) activeMinerCount++;
             }
         });
         
@@ -381,8 +507,13 @@ export class Game {
         
         // チェスト容量（仮想的な容量計算）
         const maxChestCapacity = chestCount * 100; // 1チェストあたり100個と仮定
-        const chestCapacity = maxChestCapacity > 0 ? Math.min(100, Math.round((this.ironCount / maxChestCapacity) * 100)) : 0;
+        const totalCollected = Object.values(this.resourceCounts).reduce((sum, count) => sum + count, 0);
+        const chestCapacity = maxChestCapacity > 0 ? Math.min(100, Math.round((totalCollected / maxChestCapacity) * 100)) : 0;
         document.getElementById('chest-capacity').textContent = `${chestCapacity}% 満杯`;
+        
+        // 製錬炉稼働率
+        const smelterEfficiency = this.buildingManager.getSmelterUtilization();
+        document.getElementById('smelter-efficiency').textContent = `${smelterEfficiency}% 稼働`;
     }
 
     /**
@@ -494,7 +625,7 @@ export class Game {
         ctx.globalAlpha = 1.0;
         
         // 現在値の表示（全資源合計）
-        const currentTotal = this.resourceCounts.iron + this.resourceCounts.copper + this.resourceCounts.coal;
+        const currentTotal = this.totalProduced.iron + this.totalProduced.copper + this.totalProduced.coal;
         
         ctx.fillStyle = '#ecf0f1';
         ctx.font = '12px Arial';
@@ -527,8 +658,10 @@ export class Game {
         const hasMiners = this.buildingManager.getBuildingCount(BUILDING_TYPES.MINER) > 0;
         const hasBelts = this.buildingManager.getBuildingCount(BUILDING_TYPES.BELT) > 0;
         const hasChests = this.buildingManager.getBuildingCount(BUILDING_TYPES.CHEST) > 0;
+        const hasSmelters = this.buildingManager.getBuildingCount(BUILDING_TYPES.SMELTER) > 0;
+        const metalPlateCount = this.totalProduced.iron_plate + this.totalProduced.copper_plate;
         
-        this.renderer.updateHints(buildingCount, hasMiners, hasBelts, hasChests);
+        this.renderer.updateHints(buildingCount, hasMiners, hasBelts, hasChests, hasSmelters, metalPlateCount);
     }
 
     /**

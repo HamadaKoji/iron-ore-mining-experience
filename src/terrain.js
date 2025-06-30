@@ -10,9 +10,9 @@ export class TerrainGenerator {
      * @returns {Array<Array<string>>} 地形データ
      */
     static generateTerrain(resourceChances = {
-        iron: 0.15,
-        copper: 0.12,
-        coal: 0.10
+        iron: 0.05,
+        copper: 0.04,
+        coal: 0.03
     }) {
         const terrain = [];
         for (let y = 0; y < GAME_CONFIG.GRID_HEIGHT; y++) {
