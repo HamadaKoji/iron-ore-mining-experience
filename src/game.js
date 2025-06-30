@@ -3,7 +3,6 @@ import { TerrainGenerator } from './terrain.js';
 import { BuildingManager } from './buildings.js';
 import { ItemManager } from './items.js';
 import { Renderer } from './renderer.js';
-import { ProductionChart } from './chart.js';
 import { EfficiencyChart } from './efficiency-chart.js';
 
 /**
@@ -63,7 +62,6 @@ export class Game {
         this.buildingManager = new BuildingManager();
         this.itemManager = new ItemManager();
         this.renderer = new Renderer(this.canvas);
-        this.productionChart = new ProductionChart('productionChart');
         this.efficiencyChart = new EfficiencyChart('efficiencyChart');
         
         this.setupEventListeners();
@@ -137,12 +135,6 @@ export class Game {
             // 最大効率記録は保持（リセットしない）
             
             // グラフをクリア
-            this.productionChart.data = {
-                iron_plate: new Array(this.productionChart.maxDataPoints).fill(0),
-                copper_plate: new Array(this.productionChart.maxDataPoints).fill(0)
-            };
-            this.productionChart.draw();
-            
             this.efficiencyChart.data = new Array(this.efficiencyChart.maxDataPoints).fill(0);
             this.efficiencyChart.draw();
         }
@@ -555,12 +547,6 @@ export class Game {
             if (this.stats.productionHistory.length > 60) {
                 this.stats.productionHistory.shift();
             }
-            
-            // グラフ更新
-            this.productionChart.updateData(
-                this.stats.resourceRates.iron_plate,
-                this.stats.resourceRates.copper_plate
-            );
             
             this.stats.lastStatsUpdate = now;
         }
