@@ -109,7 +109,7 @@ export class Game {
      * ゲームをリセット（建物を全て削除、記録もリセット）
      */
     resetGame() {
-        if (confirm('ゲームをリセットしますか？\n全ての建物と最大効率記録が削除されます。')) {
+        if (confirm('ゲームをリセットしますか？\n全ての建物が削除されます。\n（ベストスコアは保持されます）')) {
             // 建物を全て削除
             this.buildingManager.clear();
             this.itemManager.clear();
@@ -130,14 +130,7 @@ export class Game {
             this.stats.productionHistory = [];
             this.stats.efficiencyHistory = [];
             
-            // 最大効率記録をリセット
-            this.stats.maxBeltEfficiency = {
-                value: 0,
-                date: null,
-                metalRate: 0,
-                beltCount: 0
-            };
-            localStorage.removeItem('maxBeltEfficiency');
+            // 最大効率記録は保持（リセットしない）
             
             // グラフをクリア
             this.productionChart.data = {
