@@ -108,6 +108,19 @@ export class Game {
     }
     
     /**
+     * カウントをリセットするヘルパー関数
+     */
+    resetCounts() {
+        // 生産カウントをリセット
+        Object.keys(this.totalProduced).forEach(key => {
+            this.totalProduced[key] = 0;
+        });
+        Object.keys(this.resourceCounts).forEach(key => {
+            this.resourceCounts[key] = 0;
+        });
+    }
+
+    /**
      * ゲームをリセット（建物を全て削除、記録もリセット）
      */
     resetGame() {
@@ -116,13 +129,8 @@ export class Game {
             this.buildingManager.clear();
             this.itemManager.clear();
             
-            // 生産カウントをリセット
-            Object.keys(this.totalProduced).forEach(key => {
-                this.totalProduced[key] = 0;
-            });
-            Object.keys(this.resourceCounts).forEach(key => {
-                this.resourceCounts[key] = 0;
-            });
+            // カウントをリセット
+            this.resetCounts();
             
             // 統計をリセット
             Object.keys(this.stats.resourceRates).forEach(key => {
@@ -153,13 +161,8 @@ export class Game {
             this.buildingManager.clear();
             this.itemManager.clear();
             
-            // 生産カウントをリセット
-            Object.keys(this.totalProduced).forEach(key => {
-                this.totalProduced[key] = 0;
-            });
-            Object.keys(this.resourceCounts).forEach(key => {
-                this.resourceCounts[key] = 0;
-            });
+            // カウントをリセット
+            this.resetCounts();
             
             // 統計をリセット
             Object.keys(this.stats.resourceRates).forEach(key => {
