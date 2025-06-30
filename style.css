@@ -404,6 +404,28 @@ body {
     background: rgba(44, 62, 80, 0.8);
 }
 
+/* グラフの凡例 */
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
 /* ===== ガイドセクション ===== */
 .guide-content {
     display: flex;

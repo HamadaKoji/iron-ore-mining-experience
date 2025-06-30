@@ -3,6 +3,7 @@ import { TerrainGenerator } from './terrain.js';
 import { BuildingManager } from './buildings.js';
 import { ItemManager } from './items.js';
 import { Renderer } from './renderer.js';
+import { ProductionChart } from './chart.js';
 
 /**
  * メインゲームクラス
@@ -58,9 +59,9 @@ export class Game {
         this.buildingManager = new BuildingManager();
         this.itemManager = new ItemManager();
         this.renderer = new Renderer(this.canvas);
+        this.productionChart = new ProductionChart('productionChart');
         
         this.setupEventListeners();
-        this.setupProductionChart();
         this.gameLoop();
     }
 
@@ -402,10 +403,7 @@ export class Game {
      * UI更新
      */
     updateUI() {
-        // 各資源の統計更新（総生産量を表示）
-        document.getElementById('iron-count').textContent = this.totalProduced.iron;
-        document.getElementById('copper-count').textContent = this.totalProduced.copper;
-        document.getElementById('coal-count').textContent = this.totalProduced.coal;
+        // 金属板の統計更新（総生産量を表示）
         document.getElementById('iron-plate-count').textContent = this.totalProduced.iron_plate;
         document.getElementById('copper-plate-count').textContent = this.totalProduced.copper_plate;
         
@@ -477,7 +475,10 @@ export class Game {
             }
             
             // グラフ更新
-            this.updateProductionChart();
+            this.productionChart.updateData(
+                this.stats.resourceRates.iron_plate,
+                this.stats.resourceRates.copper_plate
+            );
             
             this.stats.lastStatsUpdate = now;
         }
