@@ -96,7 +96,7 @@ framework.test('ベルト終端での停止', function() {
     const buildingManager = new BuildingManager();
     const terrain = createTestTerrain();
     
-    // ベルトのみ設置（次にベルトやチェストなし）
+    // ベルトのみ設置（次にベルトなし）
     buildingManager.placeBuilding(5, 5, BUILDING_TYPES.BELT, terrain);
     
     // ベルトにアイテムを追加
@@ -109,25 +109,6 @@ framework.test('ベルト終端での停止', function() {
     this.assertEqual(itemManager.getItemsAt(5, 5).length, 1, 'ベルト終端でアイテムが停止していない');
 });
 
-framework.test('チェストでのアイテム回収', function() {
-    const itemManager = new ItemManager();
-    const buildingManager = new BuildingManager();
-    const terrain = createTestTerrain();
-    
-    // ベルトとチェストを設置
-    buildingManager.placeBuilding(5, 5, BUILDING_TYPES.BELT, terrain);
-    buildingManager.placeBuilding(6, 5, BUILDING_TYPES.CHEST, terrain);
-    
-    // ベルトにアイテムを追加
-    itemManager.addItem(5, 5, 'iron');
-    
-    // アイテム移動
-    const collectedItems = itemManager.moveItems(buildingManager);
-    
-    // アイテムが回収されたことを確認
-    this.assertEqual(collectedItems.iron, 1, 'アイテムが回収されていない');
-    this.assertEqual(itemManager.getItemsAt(6, 5).length, 0, 'チェストにアイテムが残っている');
-});
 
 framework.test('ベルト上アイテム数カウント', function() {
     const itemManager = new ItemManager();

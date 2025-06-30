@@ -76,8 +76,6 @@ export class Game {
         // 建物選択ボタン
         document.getElementById('miner-btn').addEventListener('click', 
             () => this.selectTool(BUILDING_TYPES.MINER));
-        document.getElementById('chest-btn').addEventListener('click', 
-            () => this.selectTool(BUILDING_TYPES.CHEST));
         document.getElementById('smelter-btn')?.addEventListener('click', 
             () => this.selectTool(BUILDING_TYPES.SMELTER));
         
@@ -183,9 +181,6 @@ export class Game {
                 break;
             case BUILDING_TYPES.BELT:
                 cursor = 'copy';
-                break;
-            case BUILDING_TYPES.CHEST:
-                cursor = 'grab';
                 break;
         }
         this.canvas.style.cursor = cursor;
@@ -417,19 +412,17 @@ export class Game {
         // 建物数の更新
         const minerCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.MINER);
         const beltCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.BELT);
-        const chestCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.CHEST);
         const smelterCount = this.buildingManager.getBuildingCount(BUILDING_TYPES.SMELTER);
         
         document.getElementById('miner-count').textContent = minerCount;
         document.getElementById('belt-count').textContent = beltCount;
-        document.getElementById('chest-count').textContent = chestCount;
         document.getElementById('smelter-count').textContent = smelterCount;
         
         // 統計情報の更新
         this.updateStats();
         
         // 効率情報の更新
-        this.updateEfficiencyStats(minerCount, beltCount, chestCount, smelterCount);
+        this.updateEfficiencyStats(minerCount, beltCount, smelterCount);
         
         const debugElement = document.getElementById('debug-info');
         if (debugElement) {
@@ -437,7 +430,7 @@ export class Game {
             const itemsOnBelts = this.itemManager.getItemsOnBelts(this.buildingManager);
             
             debugElement.innerHTML = `
-                建物: 採掘機${minerCount}個, ベルト${beltCount}個, チェスト${chestCount}個<br>
+                建物: 採掘機${minerCount}個, ベルト${beltCount}個, 製錬炉${smelterCount}個<br>
                 マップ上のアイテム: ${totalItems}個 (ベルト上: ${itemsOnBelts}個)
             `;
         }
@@ -494,7 +487,7 @@ export class Game {
     /**
      * 効率統計の更新
      */
-    updateEfficiencyStats(minerCount, beltCount, chestCount, smelterCount) {
+    updateEfficiencyStats(minerCount, beltCount, smelterCount) {
         // 採掘機効率（実際に採掘している採掘機の割合）
         let activeMinerCount = 0;
         this.buildingManager.getAllBuildings().forEach(building => {
@@ -529,11 +522,6 @@ export class Game {
         const beltUsage = beltCount > 0 ? Math.min(100, Math.round((itemsOnBelts / beltCount) * 100)) : 0;
         document.getElementById('belt-usage').textContent = `${beltUsage}% 使用`;
         
-        // チェスト容量（仮想的な容量計算）
-        const maxChestCapacity = chestCount * 100; // 1チェストあたり100個と仮定
-        const totalCollected = Object.values(this.resourceCounts).reduce((sum, count) => sum + count, 0);
-        const chestCapacity = maxChestCapacity > 0 ? Math.min(100, Math.round((totalCollected / maxChestCapacity) * 100)) : 0;
-        document.getElementById('chest-capacity').textContent = `${chestCapacity}% 満杯`;
         
         // 製錬炉稼働率
         const smelterEfficiency = this.buildingManager.getSmelterUtilization();
@@ -742,11 +730,10 @@ export class Game {
         const buildingCount = buildings.size;
         const hasMiners = this.buildingManager.getBuildingCount(BUILDING_TYPES.MINER) > 0;
         const hasBelts = this.buildingManager.getBuildingCount(BUILDING_TYPES.BELT) > 0;
-        const hasChests = this.buildingManager.getBuildingCount(BUILDING_TYPES.CHEST) > 0;
         const hasSmelters = this.buildingManager.getBuildingCount(BUILDING_TYPES.SMELTER) > 0;
         const metalPlateCount = this.totalProduced.iron_plate + this.totalProduced.copper_plate;
         
-        this.renderer.updateHints(buildingCount, hasMiners, hasBelts, hasChests, hasSmelters, metalPlateCount);
+        this.renderer.updateHints(buildingCount, hasMiners, hasBelts, hasSmelters, metalPlateCount);
     }
 
     /**

@@ -72,11 +72,9 @@ framework.test('建物カウント', function() {
     manager.placeBuilding(0, 0, BUILDING_TYPES.MINER, terrain);
     manager.placeBuilding(1, 1, BUILDING_TYPES.BELT, terrain);
     manager.placeBuilding(2, 2, BUILDING_TYPES.BELT, terrain);
-    manager.placeBuilding(3, 3, BUILDING_TYPES.CHEST, terrain);
     
     this.assertEqual(manager.getBuildingCount(BUILDING_TYPES.MINER), 1, '採掘機の数が正しくない');
     this.assertEqual(manager.getBuildingCount(BUILDING_TYPES.BELT), 2, 'ベルトの数が正しくない');
-    this.assertEqual(manager.getBuildingCount(BUILDING_TYPES.CHEST), 1, 'チェストの数が正しくない');
 });
 
 framework.test('全建物クリア', function() {
