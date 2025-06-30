@@ -12,9 +12,14 @@ export class EfficiencyChart {
         
         // グラフの設定
         this.config = {
-            padding: 15,
+            padding: 25,
+            paddingLeft: 35,
+            paddingTop: 20,
+            paddingBottom: 25,
             gridLines: 4,
-            color: '#f39c12'
+            color: '#f39c12',
+            minYScale: 4.0,  // 最小Y軸スケール
+            yScaleMultiplier: 1.2  // データ最大値に対する余裕係数
         };
         
         // Canvasのサイズを設定
@@ -60,6 +65,15 @@ export class EfficiencyChart {
         // キャンバスをクリア
         this.ctx.clearRect(0, 0, this.width, this.height);
         
+        // 現在のデータの最大値を計算
+        const maxValue = Math.max(...this.data, 0);
+        
+        // Y軸のスケールを決定（最小値は4.0、データに応じて自動調整）
+        this.currentYScale = Math.max(
+            this.config.minYScale,
+            Math.ceil(maxValue * this.config.yScaleMultiplier)
+        );
+        
         // グリッドとラベルを描画
         this.drawGrid();
         
@@ -71,9 +85,10 @@ export class EfficiencyChart {
      * グリッドとラベルを描画
      */
     drawGrid() {
-        const { padding } = this.config;
-        const graphWidth = this.width - padding * 2;
-        const graphHeight = this.height - padding * 2;
+        const { paddingLeft, paddingTop, paddingBottom } = this.config;
+        const paddingRight = 20;
+        const graphWidth = this.width - paddingLeft - paddingRight;
+        const graphHeight = this.height - paddingTop - paddingBottom;
         
         // グリッドラインのスタイル
         this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
@@ -81,30 +96,30 @@ export class EfficiencyChart {
         
         // 水平グリッドライン
         for (let i = 0; i <= this.config.gridLines; i++) {
-            const y = padding + (graphHeight / this.config.gridLines) * i;
+            const y = paddingTop + (graphHeight / this.config.gridLines) * i;
             
             this.ctx.beginPath();
-            this.ctx.moveTo(padding, y);
-            this.ctx.lineTo(this.width - padding, y);
+            this.ctx.moveTo(paddingLeft, y);
+            this.ctx.lineTo(this.width - paddingRight, y);
             this.ctx.stroke();
             
             // Y軸ラベル（効率値）
-            if (i < this.config.gridLines) {
-                const value = (this.config.gridLines - i) * 1.0; // 最大4.0
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                this.ctx.font = '10px Arial';
-                this.ctx.textAlign = 'right';
-                this.ctx.fillText(value.toFixed(1), padding - 5, y + 3);
-            }
+            const value = (this.config.gridLines - i) * (this.currentYScale / this.config.gridLines);
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            this.ctx.font = '10px Arial';
+            this.ctx.textAlign = 'right';
+            // 整数の場合は小数点を表示しない
+            const labelText = value % 1 === 0 ? value.toString() : value.toFixed(1);
+            this.ctx.fillText(labelText, paddingLeft - 5, y + 3);
         }
         
         // 時間軸のマーカー（5点ごと = 75秒ごと）
         for (let i = 0; i < this.maxDataPoints; i += 5) {
-            const x = padding + (graphWidth / (this.maxDataPoints - 1)) * i;
+            const x = paddingLeft + (graphWidth / (this.maxDataPoints - 1)) * i;
             
             this.ctx.beginPath();
-            this.ctx.moveTo(x, this.height - padding);
-            this.ctx.lineTo(x, this.height - padding + 5);
+            this.ctx.moveTo(x, this.height - paddingBottom);
+            this.ctx.lineTo(x, this.height - paddingBottom + 5);
             this.ctx.stroke();
             
             // X軸ラベル（時間）
@@ -112,7 +127,7 @@ export class EfficiencyChart {
             this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
             this.ctx.font = '9px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(`${minutes}分前`, x, this.height - padding + 15);
+            this.ctx.fillText(`${minutes}分前`, x, this.height - 5);
         }
     }
     
@@ -120,17 +135,18 @@ export class EfficiencyChart {
      * データラインを描画
      */
     drawLine() {
-        const { padding, color } = this.config;
-        const graphWidth = this.width - padding * 2;
-        const graphHeight = this.height - padding * 2;
+        const { paddingLeft, paddingTop, paddingBottom, color } = this.config;
+        const paddingRight = 20;
+        const graphWidth = this.width - paddingLeft - paddingRight;
+        const graphHeight = this.height - paddingTop - paddingBottom;
         
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         
         this.data.forEach((value, index) => {
-            const x = padding + (graphWidth / (this.maxDataPoints - 1)) * index;
-            const y = padding + graphHeight - (value / 4.0) * graphHeight; // 4.0を最大値として正規化
+            const x = paddingLeft + (graphWidth / (this.maxDataPoints - 1)) * index;
+            const y = paddingTop + graphHeight - (value / this.currentYScale) * graphHeight; // 動的なスケールで正規化
             
             if (index === 0) {
                 this.ctx.moveTo(x, y);
@@ -143,8 +159,8 @@ export class EfficiencyChart {
         
         // 最新の値に点を描画
         const lastIndex = this.data.length - 1;
-        const lastX = padding + (graphWidth / (this.maxDataPoints - 1)) * lastIndex;
-        const lastY = padding + graphHeight - (this.data[lastIndex] / 4.0) * graphHeight;
+        const lastX = paddingLeft + (graphWidth / (this.maxDataPoints - 1)) * lastIndex;
+        const lastY = paddingTop + graphHeight - (this.data[lastIndex] / this.currentYScale) * graphHeight;
         
         // 効率に応じて色を変更
         const lastValue = this.data[lastIndex];
