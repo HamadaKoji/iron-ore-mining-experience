@@ -343,18 +343,17 @@ export class Game {
                 
                 // 出力バッファにアイテムがあり、隣接するベルトがある場合、アイテムを排出
                 if (building.outputBuffer) {
-                    // 全方向の隣接ベルトをチェック
+                    // 全方向の隣接ベルトをチェック（どの方向のベルトでも出力可能）
                     const adjacentPositions = [
-                        { x: building.x + 1, y: building.y, dir: DIRECTIONS.RIGHT },
-                        { x: building.x, y: building.y + 1, dir: DIRECTIONS.DOWN },
-                        { x: building.x - 1, y: building.y, dir: DIRECTIONS.LEFT },
-                        { x: building.x, y: building.y - 1, dir: DIRECTIONS.UP }
+                        { x: building.x + 1, y: building.y },
+                        { x: building.x, y: building.y + 1 },
+                        { x: building.x - 1, y: building.y },
+                        { x: building.x, y: building.y - 1 }
                     ];
                     
                     for (const pos of adjacentPositions) {
                         const adjacentBuilding = this.buildingManager.getBuildingAt(pos.x, pos.y);
-                        if (adjacentBuilding && adjacentBuilding.type === BUILDING_TYPES.BELT && 
-                            adjacentBuilding.direction === pos.dir) {
+                        if (adjacentBuilding && adjacentBuilding.type === BUILDING_TYPES.BELT) {
                             this.itemManager.addItem(pos.x, pos.y, building.outputBuffer);
                             building.outputBuffer = null;
                             break;
