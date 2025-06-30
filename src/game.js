@@ -4,6 +4,7 @@ import { BuildingManager } from './buildings.js';
 import { ItemManager } from './items.js';
 import { Renderer } from './renderer.js';
 import { ProductionChart } from './chart.js';
+import { EfficiencyChart } from './efficiency-chart.js';
 
 /**
  * メインゲームクラス
@@ -51,7 +52,9 @@ export class Game {
                 copper_plate: 0
             },
             lastStatsUpdate: Date.now(),
-            productionHistory: [] // 生産グラフ用
+            productionHistory: [], // 生産グラフ用
+            lastEfficiencyUpdate: Date.now(),
+            efficiencyHistory: [] // 効率グラフ用
         };
         
         // モジュール初期化
@@ -60,6 +63,7 @@ export class Game {
         this.itemManager = new ItemManager();
         this.renderer = new Renderer(this.canvas);
         this.productionChart = new ProductionChart('productionChart');
+        this.efficiencyChart = new EfficiencyChart('efficiencyChart');
         
         this.setupEventListeners();
         this.gameLoop();
@@ -544,30 +548,56 @@ export class Game {
      * @param {number} beltCount - ベルトの総数
      */
     updateBeltEfficiency(beltCount) {
+        const now = Date.now();
+        const timeDiff = now - this.stats.lastEfficiencyUpdate;
+        
         // 総金属板生産レート（鉄板 + 銅板）
         const totalMetalRate = this.stats.resourceRates.iron_plate + this.stats.resourceRates.copper_plate;
         
-        // UI要素を更新
+        // UI要素を常に更新
         document.getElementById('total-metal-rate').textContent = totalMetalRate;
         document.getElementById('belt-count-efficiency').textContent = beltCount;
         
         // ベルト効率を計算
         const efficiencyElement = document.getElementById('belt-efficiency');
+        let currentEfficiency = 0;
+        
         if (beltCount === 0) {
             efficiencyElement.textContent = 'ベルトなし';
             efficiencyElement.style.color = '#95a5a6';
         } else {
-            const efficiency = totalMetalRate / beltCount;
-            efficiencyElement.textContent = efficiency.toFixed(1);
+            currentEfficiency = totalMetalRate / beltCount;
+            efficiencyElement.textContent = currentEfficiency.toFixed(1);
             
             // 効率に応じて色を変更（高効率: 緑、低効率: 赤）
-            if (efficiency >= 2.0) {
+            if (currentEfficiency >= 2.0) {
                 efficiencyElement.style.color = '#2ecc71'; // 緑
-            } else if (efficiency >= 1.0) {
+            } else if (currentEfficiency >= 1.0) {
                 efficiencyElement.style.color = '#f39c12'; // オレンジ
             } else {
                 efficiencyElement.style.color = '#e74c3c'; // 赤
             }
+        }
+        
+        // 15秒ごとにグラフを更新
+        if (timeDiff >= 15000) {
+            // 効率履歴に追加
+            this.stats.efficiencyHistory.push({
+                time: now,
+                efficiency: currentEfficiency,
+                totalMetalRate: totalMetalRate,
+                beltCount: beltCount
+            });
+            
+            // 最大20個まで保持（5分間のデータ）
+            if (this.stats.efficiencyHistory.length > 20) {
+                this.stats.efficiencyHistory.shift();
+            }
+            
+            // グラフを更新
+            this.efficiencyChart.updateData(currentEfficiency);
+            
+            this.stats.lastEfficiencyUpdate = now;
         }
     }
 
