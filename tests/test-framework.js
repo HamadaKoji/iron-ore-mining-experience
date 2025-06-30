@@ -66,6 +66,17 @@ export class TestFramework {
     }
 
     /**
+     * アサーション: nullチェック
+     * @param {*} value - チェックする値
+     * @param {string} message - エラーメッセージ
+     */
+    assertNull(value, message = '') {
+        if (value !== null) {
+            throw new Error(`${message} - Expected null value, got: ${value}`);
+        }
+    }
+
+    /**
      * 全テストを実行
      */
     async runAll() {

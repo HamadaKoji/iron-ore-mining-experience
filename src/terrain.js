@@ -114,4 +114,14 @@ export class TerrainGenerator {
                 return null;
         }
     }
+
+    /**
+     * 鉱石エリアの総数をカウント（後方互換性のため）
+     * @param {Array<Array<string>>} terrain - 地形データ
+     * @returns {number} 鉱石エリアの総数
+     */
+    static countOreAreas(terrain) {
+        const counts = this.countResourceAreas(terrain);
+        return counts.iron + counts.copper + counts.coal;
+    }
 }
