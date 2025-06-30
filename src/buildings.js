@@ -190,4 +190,15 @@ export class BuildingManager {
 
         return Math.round((workingSmelters / smelters.length) * 100);
     }
+    
+    /**
+     * 稼働中の製錬炉数を取得
+     * @returns {number} 稼働中の製錬炉数
+     */
+    getActiveSmelterCount() {
+        return Array.from(this.buildings.values())
+            .filter(building => building.type === BUILDING_TYPES.SMELTER)
+            .filter(smelter => smelter.smeltingProgress > 0 || smelter.outputBuffer !== null)
+            .length;
+    }
 }

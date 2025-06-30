@@ -12,7 +12,10 @@
         <!-- ヘッダー -->
         <header class="game-header">
             <div class="header-content">
-                <h1 class="game-title">🪨 初めての鉄鉱石採掘体験</h1>
+                <div class="header-title-group">
+                    <h1 class="game-title">🪨 初めての鉄鉱石採掘体験</h1>
+                    <p class="game-subtitle">効率的な工場を設計して、最高の生産密度を目指そう！</p>
+                </div>
                 <div class="toolbar">
                     <button id="miner-btn" class="tool-btn active">⛏️ 採掘機</button>
                     <div class="belt-group">
@@ -22,6 +25,7 @@
                         <button id="belt-up-btn" class="tool-btn belt-btn" data-direction="up">⬆️ ベルト</button>
                     </div>
                     <button id="smelter-btn" class="tool-btn">🔥 製錬炉</button>
+                    <button id="reset-btn" class="tool-btn reset-btn">🔄 リセット</button>
                 </div>
             </div>
         </header>
@@ -134,24 +138,6 @@
                     </div>
                 </section>
 
-                <!-- 生産グラフ -->
-                <section class="chart-section">
-                    <h3 class="section-title">📈 金属板生産グラフ</h3>
-                    <div class="chart-container">
-                        <canvas id="productionChart" width="250" height="150"></canvas>
-                        <div class="chart-legend">
-                            <div class="legend-item">
-                                <span class="legend-color" style="background-color: #4682B4;"></span>
-                                <span class="legend-label">🗾 鉄板</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background-color: #FF8C00;"></span>
-                                <span class="legend-label">🟧 銅板</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- 効率レポート -->
                 <section class="efficiency-section">
                     <h3 class="section-title">⚡ 効率レポート</h3>
@@ -159,17 +145,34 @@
                         <div class="efficiency-card">
                             <div class="efficiency-icon">🏭</div>
                             <div class="efficiency-content">
-                                <div class="efficiency-label">ベルト効率</div>
+                                <div class="efficiency-label">生産密度スコア</div>
                                 <div class="efficiency-value" id="belt-efficiency">--</div>
-                                <div class="efficiency-unit">個/分/ベルト</div>
+                                <div class="efficiency-unit">ポイント</div>
                                 <div class="efficiency-detail">
                                     総金属板生産: <span id="total-metal-rate">0</span> 個/分<br>
-                                    ベルト数: <span id="belt-count-efficiency">0</span> 個
+                                    <span id="operating-efficiency">稼働効率: 0.0%</span>
                                 </div>
                             </div>
                         </div>
                         <div class="efficiency-chart">
                             <canvas id="efficiencyChart" width="250" height="120"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 最大効率記録 -->
+                <section class="max-efficiency-section">
+                    <h3 class="section-title">🏆 最大効率記録</h3>
+                    <div class="max-efficiency-container">
+                        <div class="max-efficiency-card">
+                            <div class="max-efficiency-icon">🎖️</div>
+                            <div class="max-efficiency-content">
+                                <div class="max-efficiency-label">ベストスコア</div>
+                                <div class="max-efficiency-value" id="max-efficiency">--</div>
+                                <div class="max-efficiency-unit">ポイント</div>
+                                <div class="max-efficiency-date" id="max-efficiency-date"></div>
+                                <div class="max-efficiency-detail" id="max-efficiency-detail">まだ記録がありません</div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -197,27 +200,27 @@
                         
                         <!-- 資源エリアの説明 -->
                         <div class="resource-guide">
-                            <h4 class="resource-title">📍 資源エリア</h4>
+                            <h4 class="resource-title">📍 資源エリア（画面内の色分け）</h4>
                             <div class="resource-types">
-                                <div class="resource-type">
+                                <div class="resource-type" style="border-left: 3px solid #8B4513;">
                                     <span class="resource-icon">🔩</span>
                                     <div class="resource-info">
                                         <span class="resource-name">鉄鉱石</span>
-                                        <span class="resource-desc">茶色エリア - 鉄板の原料</span>
+                                        <span class="resource-desc">茶色エリア（濃い茶） - 鉄板の原料</span>
                                     </div>
                                 </div>
-                                <div class="resource-type">
+                                <div class="resource-type" style="border-left: 3px solid #CD853F;">
                                     <span class="resource-icon">🟠</span>
                                     <div class="resource-info">
                                         <span class="resource-name">銅鉱石</span>
-                                        <span class="resource-desc">オレンジエリア - 銅板の原料</span>
+                                        <span class="resource-desc">橙色エリア（薄い茶） - 銅板の原料</span>
                                     </div>
                                 </div>
-                                <div class="resource-type">
+                                <div class="resource-type" style="border-left: 3px solid #2F2F2F;">
                                     <span class="resource-icon">⚫</span>
                                     <div class="resource-info">
                                         <span class="resource-name">石炭</span>
-                                        <span class="resource-desc">黒色エリア - 製錬炉の燃料</span>
+                                        <span class="resource-desc">黒色エリア（濃い灰色） - 製錬炉の燃料</span>
                                     </div>
                                 </div>
                             </div>
@@ -244,20 +247,37 @@
                             </div>
                         </div>
                         
-                        <!-- コツとヒント -->
-                        <div class="guide-tips">
-                            <h4 class="tips-title">💡 コツ</h4>
-                            <div class="tip-item">
-                                <span class="tip-icon">⚡</span>
-                                <span class="tip-text">各資源を同時に採掘して効率アップ</span>
-                            </div>
-                            <div class="tip-item">
-                                <span class="tip-icon">🔄</span>
-                                <span class="tip-text">長いベルトラインで大量運搬</span>
-                            </div>
-                            <div class="tip-item">
-                                <span class="tip-icon">📊</span>
-                                <span class="tip-text">統計パネルで生産効率を確認</span>
+                        <!-- ゲームの目的 -->
+                        <div class="game-objective">
+                            <h4 class="objective-title">🎯 ゲームの目的</h4>
+                            <div class="objective-content">
+                                <div class="objective-main">
+                                    <span class="objective-icon">🏆</span>
+                                    <span class="objective-text">「生産密度スコア」を最大化しよう！</span>
+                                </div>
+                                <div class="objective-formula">
+                                    <div class="formula-title">📢 スコア計算式</div>
+                                    <div class="formula-content">
+                                        スコア = 金属板生産量 × 稼働効率
+                                    </div>
+                                    <div class="formula-detail">
+                                        稼働効率 = (稼働中の採掘機 × 稼働中の製錬炉) ÷ 総建物数
+                                    </div>
+                                </div>
+                                <div class="objective-tips">
+                                    <div class="tip-item">
+                                        <span class="tip-icon">🏭</span>
+                                        <span class="tip-text">大規模で効率的な工場を構築しよう</span>
+                                    </div>
+                                    <div class="tip-item">
+                                        <span class="tip-icon">✨</span>
+                                        <span class="tip-text">無駄のない設計で高スコアを目指そう</span>
+                                    </div>
+                                    <div class="tip-item">
+                                        <span class="tip-icon">🔄</span>
+                                        <span class="tip-text">リセットして何度でもベストスコアに挑戦！</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

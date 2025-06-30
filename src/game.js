@@ -3,7 +3,6 @@ import { TerrainGenerator } from './terrain.js';
 import { BuildingManager } from './buildings.js';
 import { ItemManager } from './items.js';
 import { Renderer } from './renderer.js';
-import { ProductionChart } from './chart.js';
 import { EfficiencyChart } from './efficiency-chart.js';
 
 /**
@@ -54,7 +53,8 @@ export class Game {
             lastStatsUpdate: Date.now(),
             productionHistory: [], // 生産グラフ用
             lastEfficiencyUpdate: Date.now(),
-            efficiencyHistory: [] // 効率グラフ用
+            efficiencyHistory: [], // 効率グラフ用
+            maxBeltEfficiency: this.loadMaxEfficiency() // 最大効率を読み込み
         };
         
         // モジュール初期化
@@ -62,11 +62,82 @@ export class Game {
         this.buildingManager = new BuildingManager();
         this.itemManager = new ItemManager();
         this.renderer = new Renderer(this.canvas);
-        this.productionChart = new ProductionChart('productionChart');
         this.efficiencyChart = new EfficiencyChart('efficiencyChart');
         
         this.setupEventListeners();
+        this.updateMaxEfficiencyDisplay(); // 初期表示
         this.gameLoop();
+    }
+    
+    /**
+     * ローカルストレージから最大効率を読み込み
+     * @returns {Object} 最大効率データ
+     */
+    loadMaxEfficiency() {
+        const saved = localStorage.getItem('maxBeltEfficiency');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return {
+            value: 0,
+            date: null,
+            metalRate: 0,
+            beltCount: 0
+        };
+    }
+    
+    /**
+     * 最大効率を保存
+     * @param {number} efficiency - 効率値
+     * @param {number} metalRate - 金属板生産レート
+     * @param {number} beltCount - ベルト数
+     * @param {number} operatingEfficiency - 稼働効率
+     * @param {Object} buildingStats - 建物統計
+     */
+    saveMaxEfficiency(efficiency, metalRate, beltCount, operatingEfficiency = 0, buildingStats = {}) {
+        const data = {
+            value: efficiency,
+            date: new Date().toISOString(),
+            metalRate: metalRate,
+            beltCount: beltCount,
+            operatingEfficiency: operatingEfficiency,
+            buildingStats: buildingStats
+        };
+        this.stats.maxBeltEfficiency = data;
+        localStorage.setItem('maxBeltEfficiency', JSON.stringify(data));
+    }
+    
+    /**
+     * ゲームをリセット（建物を全て削除、記録もリセット）
+     */
+    resetGame() {
+        if (confirm('ゲームをリセットしますか？\n全ての建物が削除されます。\n（ベストスコアは保持されます）')) {
+            // 建物を全て削除
+            this.buildingManager.clear();
+            this.itemManager.clear();
+            
+            // 生産カウントをリセット
+            Object.keys(this.totalProduced).forEach(key => {
+                this.totalProduced[key] = 0;
+            });
+            Object.keys(this.resourceCounts).forEach(key => {
+                this.resourceCounts[key] = 0;
+            });
+            
+            // 統計をリセット
+            Object.keys(this.stats.resourceRates).forEach(key => {
+                this.stats.resourceRates[key] = 0;
+                this.stats.lastResourceCounts[key] = 0;
+            });
+            this.stats.productionHistory = [];
+            this.stats.efficiencyHistory = [];
+            
+            // 最大効率記録は保持（リセットしない）
+            
+            // グラフをクリア
+            this.efficiencyChart.data = new Array(this.efficiencyChart.maxDataPoints).fill(0);
+            this.efficiencyChart.draw();
+        }
     }
 
     /**
@@ -81,6 +152,9 @@ export class Game {
         
         // ベルトボタン（各方向）
         this.setupBeltButtons();
+        
+        // リセットボタン
+        document.getElementById('reset-btn')?.addEventListener('click', () => this.resetGame());
         
         // キャンバスイベント
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
@@ -429,9 +503,13 @@ export class Game {
             const totalItems = this.itemManager.getTotalItemCount();
             const itemsOnBelts = this.itemManager.getItemsOnBelts(this.buildingManager);
             
+            // 資源数をカウント
+            const resourceCounts = TerrainGenerator.countResourceAreas(this.terrain);
+            
             debugElement.innerHTML = `
                 建物: 採掘機${minerCount}個, ベルト${beltCount}個, 製錬炉${smelterCount}個<br>
-                マップ上のアイテム: ${totalItems}個 (ベルト上: ${itemsOnBelts}個)
+                マップ上のアイテム: ${totalItems}個 (ベルト上: ${itemsOnBelts}個)<br>
+                資源エリア: 鉄${resourceCounts.iron}個, 銅${resourceCounts.copper}個, 石炭${resourceCounts.coal}個
             `;
         }
     }
@@ -473,12 +551,6 @@ export class Game {
             if (this.stats.productionHistory.length > 60) {
                 this.stats.productionHistory.shift();
             }
-            
-            // グラフ更新
-            this.productionChart.updateData(
-                this.stats.resourceRates.iron_plate,
-                this.stats.resourceRates.copper_plate
-            );
             
             this.stats.lastStatsUpdate = now;
         }
@@ -528,14 +600,17 @@ export class Game {
         document.getElementById('smelter-efficiency').textContent = `${smelterEfficiency}% 稼働`;
         
         // ベルト効率の計算と更新
-        this.updateBeltEfficiency(beltCount);
+        this.updateBeltEfficiency(beltCount, activeMinerCount, minerCount, smelterCount);
     }
 
     /**
      * ベルト効率の更新
      * @param {number} beltCount - ベルトの総数
+     * @param {number} activeMinerCount - 稼働中の採掘機数
+     * @param {number} minerCount - 採掘機の総数
+     * @param {number} smelterCount - 製錬炉の総数
      */
-    updateBeltEfficiency(beltCount) {
+    updateBeltEfficiency(beltCount, activeMinerCount, minerCount, smelterCount) {
         const now = Date.now();
         const timeDiff = now - this.stats.lastEfficiencyUpdate;
         
@@ -544,28 +619,58 @@ export class Game {
         
         // UI要素を常に更新
         document.getElementById('total-metal-rate').textContent = totalMetalRate;
-        document.getElementById('belt-count-efficiency').textContent = beltCount;
         
-        // ベルト効率を計算
+        // 稼働中の製錬炉数を取得
+        const activeSmelterCount = this.buildingManager.getActiveSmelterCount();
+        
+        // 全体の建物数
+        const totalBuildings = minerCount + beltCount + smelterCount;
+        
+        // 生産密度システムによる効率計算
         const efficiencyElement = document.getElementById('belt-efficiency');
         let currentEfficiency = 0;
+        let operatingEfficiency = 0;
         
-        if (beltCount === 0) {
-            efficiencyElement.textContent = 'ベルトなし';
+        if (totalBuildings === 0) {
+            efficiencyElement.textContent = '建物なし';
             efficiencyElement.style.color = '#95a5a6';
         } else {
-            currentEfficiency = totalMetalRate / beltCount;
+            // 稼働効率 = (稼働中の採掘機数 × 稼働中の製錬炉数) ÷ 総建物数
+            operatingEfficiency = (activeMinerCount * activeSmelterCount) / totalBuildings;
+            
+            // 効率スコア = 総金属板生産量 × 稼働効率
+            currentEfficiency = totalMetalRate * operatingEfficiency;
+            
             efficiencyElement.textContent = currentEfficiency.toFixed(1);
             
             // 効率に応じて色を変更（高効率: 緑、低効率: 赤）
-            if (currentEfficiency >= 2.0) {
+            if (currentEfficiency >= 100.0) {
+                efficiencyElement.style.color = '#9b59b6'; // 紫（伝説的）
+            } else if (currentEfficiency >= 50.0) {
                 efficiencyElement.style.color = '#2ecc71'; // 緑
-            } else if (currentEfficiency >= 1.0) {
+            } else if (currentEfficiency >= 20.0) {
                 efficiencyElement.style.color = '#f39c12'; // オレンジ
             } else {
                 efficiencyElement.style.color = '#e74c3c'; // 赤
             }
+            
+            // 最大効率を更新
+            if (currentEfficiency > this.stats.maxBeltEfficiency.value) {
+                const buildingStats = {
+                    activeMinerCount: activeMinerCount,
+                    activeSmelterCount: activeSmelterCount,
+                    totalBuildings: totalBuildings
+                };
+                this.saveMaxEfficiency(currentEfficiency, totalMetalRate, beltCount, operatingEfficiency, buildingStats);
+                this.updateMaxEfficiencyDisplay();
+            }
         }
+        
+        // 詳細情報を更新
+        document.getElementById('operating-efficiency').textContent = `稼働効率: ${(operatingEfficiency * 100).toFixed(1)}%`;
+        
+        // 最大効率表示を更新
+        this.updateMaxEfficiencyDisplay();
         
         // 15秒ごとにグラフを更新
         if (timeDiff >= 15000) {
@@ -586,6 +691,39 @@ export class Game {
             this.efficiencyChart.updateData(currentEfficiency);
             
             this.stats.lastEfficiencyUpdate = now;
+        }
+    }
+    
+    /**
+     * 最大効率表示を更新
+     */
+    updateMaxEfficiencyDisplay() {
+        const maxEffElement = document.getElementById('max-efficiency');
+        const maxEffDateElement = document.getElementById('max-efficiency-date');
+        const maxEffDetailElement = document.getElementById('max-efficiency-detail');
+        
+        if (maxEffElement && this.stats.maxBeltEfficiency.value > 0) {
+            maxEffElement.textContent = this.stats.maxBeltEfficiency.value.toFixed(1);
+            
+            if (maxEffDateElement && this.stats.maxBeltEfficiency.date) {
+                const date = new Date(this.stats.maxBeltEfficiency.date);
+                const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                maxEffDateElement.textContent = dateStr;
+            }
+            
+            if (maxEffDetailElement) {
+                const eff = this.stats.maxBeltEfficiency;
+                if (eff.operatingEfficiency !== undefined) {
+                    maxEffDetailElement.textContent = `生産${eff.metalRate}個/分 × 稼働率${(eff.operatingEfficiency * 100).toFixed(1)}%`;
+                } else {
+                    // 旧データの場合
+                    maxEffDetailElement.textContent = `金属板${eff.metalRate}個/分`;
+                }
+            }
+        } else if (maxEffElement) {
+            maxEffElement.textContent = '--';
+            if (maxEffDateElement) maxEffDateElement.textContent = '';
+            if (maxEffDetailElement) maxEffDetailElement.textContent = 'まだ記録がありません';
         }
     }
 
