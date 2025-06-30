@@ -154,7 +154,7 @@ export class Game {
     clearBestScore() {
         if (confirm('ベストスコアをクリアしますか？\nゲーム画面もリセットされます。')) {
             // ベストスコアをクリア
-            localStorage.removeItem('maxBeltEfficiency');
+            localStorage.removeItem(MAX_EFFICIENCY_KEY);
             this.maxEfficiency = 0;
             
             // ゲームもリセット（確認なし）
