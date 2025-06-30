@@ -5,6 +5,9 @@ import { ItemManager } from './items.js';
 import { Renderer } from './renderer.js';
 import { EfficiencyChart } from './efficiency-chart.js';
 
+// LocalStorageキー
+const MAX_EFFICIENCY_KEY = 'maxBeltEfficiency';
+
 /**
  * メインゲームクラス
  */
@@ -74,7 +77,7 @@ export class Game {
      * @returns {Object} 最大効率データ
      */
     loadMaxEfficiency() {
-        const saved = localStorage.getItem('maxBeltEfficiency');
+        const saved = localStorage.getItem(MAX_EFFICIENCY_KEY);
         if (saved) {
             return JSON.parse(saved);
         }
@@ -104,7 +107,7 @@ export class Game {
             buildingStats: buildingStats
         };
         this.stats.maxBeltEfficiency = data;
-        localStorage.setItem('maxBeltEfficiency', JSON.stringify(data));
+        localStorage.setItem(MAX_EFFICIENCY_KEY, JSON.stringify(data));
     }
     
     /**
