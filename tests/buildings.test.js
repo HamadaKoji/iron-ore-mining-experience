@@ -9,8 +9,8 @@ function createTestTerrain() {
     const terrain = Array(GAME_CONFIG.GRID_HEIGHT).fill().map(() => 
         Array(GAME_CONFIG.GRID_WIDTH).fill(TERRAIN_TYPES.GRASS)
     );
-    // (0,0)を鉱石エリアに設定
-    terrain[0][0] = TERRAIN_TYPES.ORE;
+    // (0,0)を鉄鉱石エリアに設定
+    terrain[0][0] = TERRAIN_TYPES.IRON_ORE;
     return terrain;
 }
 

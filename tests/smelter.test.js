@@ -9,7 +9,7 @@ export async function runSmelterTests() {
     // テスト1: 製錬炉の設置
     test.test('製錬炉の設置 - 草地に設置', () => {
         const buildingManager = new BuildingManager();
-        const terrain = Array(18).fill(null).map(() => Array(25).fill(TERRAIN_TYPES.GRASS));
+        const terrain = Array(GAME_CONFIG.GRID_HEIGHT).fill(null).map(() => Array(GAME_CONFIG.GRID_WIDTH).fill(TERRAIN_TYPES.GRASS));
         
         const result = buildingManager.placeBuilding(5, 5, BUILDING_TYPES.SMELTER, terrain);
         test.assertTrue(result, '製錬炉を草地に設置できるべき');
@@ -25,7 +25,7 @@ export async function runSmelterTests() {
     // テスト2: 製錬炉への資源投入
     test.test('製錬炉への資源投入', () => {
         const buildingManager = new BuildingManager();
-        const terrain = Array(18).fill(null).map(() => Array(25).fill(TERRAIN_TYPES.GRASS));
+        const terrain = Array(GAME_CONFIG.GRID_HEIGHT).fill(null).map(() => Array(GAME_CONFIG.GRID_WIDTH).fill(TERRAIN_TYPES.GRASS));
         
         buildingManager.placeBuilding(5, 5, BUILDING_TYPES.SMELTER, terrain);
         const smelter = buildingManager.getBuildingAt(5, 5);
@@ -60,7 +60,7 @@ export async function runSmelterTests() {
     // テスト3: 製錬炉の稼働率計算
     test.test('製錬炉の稼働率計算', () => {
         const buildingManager = new BuildingManager();
-        const terrain = Array(18).fill(null).map(() => Array(25).fill(TERRAIN_TYPES.GRASS));
+        const terrain = Array(GAME_CONFIG.GRID_HEIGHT).fill(null).map(() => Array(GAME_CONFIG.GRID_WIDTH).fill(TERRAIN_TYPES.GRASS));
         
         // 製錬炉なしの場合
         test.assertEqual(
@@ -87,7 +87,7 @@ export async function runSmelterTests() {
     // テスト4: 鉱石エリアには設置不可
     test.test('製錬炉の設置 - 鉱石エリアに設置不可', () => {
         const buildingManager = new BuildingManager();
-        const terrain = Array(18).fill(null).map(() => Array(25).fill(TERRAIN_TYPES.GRASS));
+        const terrain = Array(GAME_CONFIG.GRID_HEIGHT).fill(null).map(() => Array(GAME_CONFIG.GRID_WIDTH).fill(TERRAIN_TYPES.GRASS));
         terrain[5][5] = TERRAIN_TYPES.IRON_ORE;
         
         const result = buildingManager.placeBuilding(5, 5, BUILDING_TYPES.SMELTER, terrain);

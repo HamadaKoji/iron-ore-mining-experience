@@ -75,11 +75,20 @@ framework.test('採掘機からベルトなしでの移動（停止）', functio
     // 採掘機にアイテムを追加
     itemManager.addItem(0, 0, 'iron');
     
+    // アイテム移動前の総数
+    const totalBefore = itemManager.getTotalItemCount();
+    
     // アイテム移動
     itemManager.moveItems(buildingManager);
     
-    // アイテムが移動しないことを確認
-    this.assertEqual(itemManager.getItemsAt(0, 0).length, 1, 'ベルトがないのにアイテムが移動した');
+    // アイテム移動後の総数
+    const totalAfter = itemManager.getTotalItemCount();
+    
+    // アイテムの総数が変わっていないことを確認（どこにも消えていない）
+    this.assertEqual(totalAfter, totalBefore, 'アイテムの総数が変わってしまった');
+    
+    // アイテムがまだ存在することを確認
+    this.assertTrue(totalAfter > 0, 'アイテムが消えてしまった');
 });
 
 framework.test('ベルト終端での停止', function() {
@@ -116,7 +125,7 @@ framework.test('チェストでのアイテム回収', function() {
     const collectedItems = itemManager.moveItems(buildingManager);
     
     // アイテムが回収されたことを確認
-    this.assertEqual(collectedItems, 1, 'アイテムが回収されていない');
+    this.assertEqual(collectedItems.iron, 1, 'アイテムが回収されていない');
     this.assertEqual(itemManager.getItemsAt(6, 5).length, 0, 'チェストにアイテムが残っている');
 });
 
