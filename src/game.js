@@ -403,7 +403,10 @@ export class Game {
      * UI更新
      */
     updateUI() {
-        // 金属板の統計更新（総生産量を表示）
+        // 各資源の統計更新（総生産量を表示）
+        document.getElementById('iron-count').textContent = this.totalProduced.iron;
+        document.getElementById('copper-count').textContent = this.totalProduced.copper;
+        document.getElementById('coal-count').textContent = this.totalProduced.coal;
         document.getElementById('iron-plate-count').textContent = this.totalProduced.iron_plate;
         document.getElementById('copper-plate-count').textContent = this.totalProduced.copper_plate;
         
