@@ -1,8 +1,8 @@
 // ゲーム設定
 export const GAME_CONFIG = {
-    GRID_WIDTH: 25,
-    GRID_HEIGHT: 18,
-    CELL_SIZE: 32,
+    GRID_WIDTH: 20,
+    GRID_HEIGHT: 23,
+    CELL_SIZE: 26,  // 525 / 20 ≈ 26, 600 / 23 ≈ 26
     MINING_INTERVAL: 120, // フレーム数（2秒）
     BELT_MOVE_INTERVAL: 30, // フレーム数（0.5秒）
     SMELTING_TIME: 240, // フレーム数（4秒）

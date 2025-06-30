@@ -71,22 +71,13 @@ export class Game {
         // 建物選択ボタン
         document.getElementById('miner-btn').addEventListener('click', 
             () => this.selectTool(BUILDING_TYPES.MINER));
-        document.getElementById('belt-btn').addEventListener('click', 
-            () => this.selectTool(BUILDING_TYPES.BELT));
         document.getElementById('chest-btn').addEventListener('click', 
             () => this.selectTool(BUILDING_TYPES.CHEST));
         document.getElementById('smelter-btn')?.addEventListener('click', 
             () => this.selectTool(BUILDING_TYPES.SMELTER));
         
-        // ベルト方向ボタン
-        document.getElementById('belt-right-btn')?.addEventListener('click', 
-            () => this.selectBeltDirection(DIRECTIONS.RIGHT));
-        document.getElementById('belt-down-btn')?.addEventListener('click', 
-            () => this.selectBeltDirection(DIRECTIONS.DOWN));
-        document.getElementById('belt-left-btn')?.addEventListener('click', 
-            () => this.selectBeltDirection(DIRECTIONS.LEFT));
-        document.getElementById('belt-up-btn')?.addEventListener('click', 
-            () => this.selectBeltDirection(DIRECTIONS.UP));
+        // ベルトボタン（各方向）
+        this.setupBeltButtons();
         
         // キャンバスイベント
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
@@ -102,52 +93,78 @@ export class Game {
     }
 
     /**
+     * ベルトボタンの設定
+     */
+    setupBeltButtons() {
+        const beltButtons = document.querySelectorAll('.belt-btn');
+        
+        beltButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const direction = button.dataset.direction;
+                const directionMap = {
+                    'right': DIRECTIONS.RIGHT,
+                    'down': DIRECTIONS.DOWN,
+                    'left': DIRECTIONS.LEFT,
+                    'up': DIRECTIONS.UP
+                };
+                
+                this.selectedBeltDirection = directionMap[direction];
+                this.selectTool(BUILDING_TYPES.BELT);
+                
+                // すべてのベルトボタンからアクティブクラスを削除
+                beltButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    }
+
+    /**
      * ツール選択
      * @param {string} tool - 選択するツール
      */
     selectTool(tool) {
         this.selectedTool = tool;
         
-        // ボタンの状態を更新
+        // すべてのツールボタンからアクティブクラスを削除
         document.querySelectorAll('.tool-btn').forEach(btn => {
             btn.classList.remove('active');
-            // ホバー効果をリセット
             btn.style.transform = '';
         });
         
-        const activeBtn = document.getElementById(tool + '-btn');
-        activeBtn.classList.add('active');
-        
-        // 選択フィードバック（軽い振動効果）
-        activeBtn.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            activeBtn.style.transform = '';
-        }, 150);
+        // ベルトの場合は対応する方向のボタンをアクティブに
+        if (tool === BUILDING_TYPES.BELT) {
+            const directionMap = {
+                [DIRECTIONS.RIGHT]: 'belt-right-btn',
+                [DIRECTIONS.DOWN]: 'belt-down-btn',
+                [DIRECTIONS.LEFT]: 'belt-left-btn',
+                [DIRECTIONS.UP]: 'belt-up-btn'
+            };
+            const activeBeltBtn = document.getElementById(directionMap[this.selectedBeltDirection]);
+            if (activeBeltBtn) {
+                activeBeltBtn.classList.add('active');
+                // 選択フィードバック（軽い振動効果）
+                activeBeltBtn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    activeBeltBtn.style.transform = '';
+                }, 150);
+            }
+        } else {
+            // 通常の建物ボタンの場合
+            const activeBtn = document.getElementById(tool + '-btn');
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                // 選択フィードバック（軽い振動効果）
+                activeBtn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    activeBtn.style.transform = '';
+                }, 150);
+            }
+        }
         
         // カーソルスタイルを変更
         this.updateCursorStyle(tool);
     }
 
-    /**
-     * ベルト方向を選択
-     * @param {string} direction - 選択する方向
-     */
-    selectBeltDirection(direction) {
-        this.selectedBeltDirection = direction;
-        
-        // ベルト方向ボタンの状態を更新
-        document.querySelectorAll('.belt-dir-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        const activeBtn = document.getElementById(`belt-${direction}-btn`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-        }
-        
-        // ベルトツールを選択
-        this.selectTool(BUILDING_TYPES.BELT);
-    }
 
     /**
      * カーソルスタイルを更新

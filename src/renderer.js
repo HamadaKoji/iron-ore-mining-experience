@@ -292,7 +292,7 @@ export class Renderer {
         
         // ヒント表示を更新
         if (hintData) {
-            hintMessage.innerHTML = `
+            const newContent = `
                 <div class="hint-icon">${hintData.icon}</div>
                 <div class="hint-text">
                     <div class="hint-title">${hintData.title}</div>
@@ -300,8 +300,23 @@ export class Renderer {
                 </div>
             `;
             
-            // CSSクラスを更新
-            hintDisplay.className = `hint-content ${hintData.className}`;
+            // 内容が変わった場合のみアニメーション
+            if (hintMessage.innerHTML.trim() !== newContent.trim()) {
+                const hintContainer = document.querySelector('.hint-container');
+                
+                // フェードアウト
+                hintContainer.style.animation = 'fadeOut 0.3s ease-out';
+                
+                setTimeout(() => {
+                    hintMessage.innerHTML = newContent;
+                    hintDisplay.className = `hint-content ${hintData.className}`;
+                    // フェードイン
+                    hintContainer.style.animation = 'fadeIn 0.5s ease-out';
+                }, 300);
+            } else {
+                // 内容が同じ場合はクラスのみ更新
+                hintDisplay.className = `hint-content ${hintData.className}`;
+            }
         }
     }
 }

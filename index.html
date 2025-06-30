@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>初めての鉄鉱石採掘体験</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,15 +15,14 @@
                 <h1 class="game-title">🪨 初めての鉄鉱石採掘体験</h1>
                 <div class="toolbar">
                     <button id="miner-btn" class="tool-btn active">⛏️ 採掘機</button>
-                    <button id="belt-btn" class="tool-btn">➡️ ベルト</button>
+                    <div class="belt-group">
+                        <button id="belt-right-btn" class="tool-btn belt-btn" data-direction="right">➡️ ベルト</button>
+                        <button id="belt-down-btn" class="tool-btn belt-btn" data-direction="down">⬇️ ベルト</button>
+                        <button id="belt-left-btn" class="tool-btn belt-btn" data-direction="left">⬅️ ベルト</button>
+                        <button id="belt-up-btn" class="tool-btn belt-btn" data-direction="up">⬆️ ベルト</button>
+                    </div>
                     <button id="chest-btn" class="tool-btn">📦 チェスト</button>
                     <button id="smelter-btn" class="tool-btn">🔥 製錬炉</button>
-                    <div class="belt-direction-group">
-                        <button id="belt-right-btn" class="belt-dir-btn active">➡️</button>
-                        <button id="belt-down-btn" class="belt-dir-btn">⬇️</button>
-                        <button id="belt-left-btn" class="belt-dir-btn">⬅️</button>
-                        <button id="belt-up-btn" class="belt-dir-btn">⬆️</button>
-                    </div>
                 </div>
             </div>
         </header>
@@ -31,101 +31,8 @@
         <main class="game-main">
             <!-- ゲーム画面 -->
             <div class="game-area">
-                <canvas id="gameCanvas" width="800" height="600"></canvas>
-            </div>
-            
-            <!-- サイドパネル -->
-            <aside class="side-panel">
-                <!-- 生産統計 -->
-                <section class="stats-section">
-                    <h3 class="section-title">📊 生産統計</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card primary">
-                            <div class="stat-icon">🔩</div>
-                            <div class="stat-info">
-                                <div class="stat-label">鉄鉱石</div>
-                                <div class="stat-value" id="iron-count">0</div>
-                                <div class="stat-rate" id="iron-rate">0/分</div>
-                            </div>
-                        </div>
-                        <div class="stat-card copper">
-                            <div class="stat-icon">🟠</div>
-                            <div class="stat-info">
-                                <div class="stat-label">銅鉱石</div>
-                                <div class="stat-value" id="copper-count">0</div>
-                                <div class="stat-rate" id="copper-rate">0/分</div>
-                            </div>
-                        </div>
-                        <div class="stat-card coal">
-                            <div class="stat-icon">⚫</div>
-                            <div class="stat-info">
-                                <div class="stat-label">石炭</div>
-                                <div class="stat-value" id="coal-count">0</div>
-                                <div class="stat-rate" id="coal-rate">0/分</div>
-                            </div>
-                        </div>
-                        <div class="stat-card iron-plate">
-                            <div class="stat-icon">🟦</div>
-                            <div class="stat-info">
-                                <div class="stat-label">鉄板</div>
-                                <div class="stat-value" id="iron-plate-count">0</div>
-                                <div class="stat-rate" id="iron-plate-rate">0/分</div>
-                            </div>
-                        </div>
-                        <div class="stat-card copper-plate">
-                            <div class="stat-icon">🟧</div>
-                            <div class="stat-info">
-                                <div class="stat-label">銅板</div>
-                                <div class="stat-value" id="copper-plate-count">0</div>
-                                <div class="stat-rate" id="copper-plate-rate">0/分</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">⛏️</div>
-                            <div class="stat-info">
-                                <div class="stat-label">採掘機</div>
-                                <div class="stat-value" id="miner-count">0</div>
-                                <div class="stat-rate" id="miner-efficiency">0% 稼働</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">➡️</div>
-                            <div class="stat-info">
-                                <div class="stat-label">ベルト</div>
-                                <div class="stat-value" id="belt-count">0</div>
-                                <div class="stat-rate" id="belt-usage">0% 使用</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">📦</div>
-                            <div class="stat-info">
-                                <div class="stat-label">チェスト</div>
-                                <div class="stat-value" id="chest-count">0</div>
-                                <div class="stat-rate" id="chest-capacity">0% 満杯</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🔥</div>
-                            <div class="stat-info">
-                                <div class="stat-label">製錬炉</div>
-                                <div class="stat-value" id="smelter-count">0</div>
-                                <div class="stat-rate" id="smelter-efficiency">0% 稼働</div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 生産グラフ -->
-                <section class="chart-section">
-                    <h3 class="section-title">📈 生産グラフ</h3>
-                    <div class="chart-container">
-                        <canvas id="productionChart" width="300" height="120"></canvas>
-                    </div>
-                </section>
-
                 <!-- ヒント表示エリア -->
-                <section class="hint-section">
-                    <h3 class="section-title">💡 ヒント</h3>
+                <div class="hint-container">
                     <div class="hint-content" id="hint-display">
                         <div class="hint-message" id="hint-message">
                             <div class="hint-icon">🎯</div>
@@ -135,8 +42,127 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <canvas id="gameCanvas" width="520" height="598"></canvas>
+            </div>
+            
+            <!-- 統計パネル -->
+            <aside class="stats-panel">
+                <!-- 生産統計 -->
+                <section class="stats-section">
+                    <h3 class="section-title">📊 生産統計</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card primary">
+                            <div class="stat-icon">🔩</div>
+                            <div class="stat-info">
+                                <div class="stat-label">鉄鉱石</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="iron-count">0</span>
+                                    <span class="stat-rate" id="iron-rate">0/分</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card copper">
+                            <div class="stat-icon">🟠</div>
+                            <div class="stat-info">
+                                <div class="stat-label">銅鉱石</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="copper-count">0</span>
+                                    <span class="stat-rate" id="copper-rate">0/分</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card coal">
+                            <div class="stat-icon">⚫</div>
+                            <div class="stat-info">
+                                <div class="stat-label">石炭</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="coal-count">0</span>
+                                    <span class="stat-rate" id="coal-rate">0/分</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card iron-plate">
+                            <div class="stat-icon">🟦</div>
+                            <div class="stat-info">
+                                <div class="stat-label">鉄板</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="iron-plate-count">0</span>
+                                    <span class="stat-rate" id="iron-plate-rate">0/分</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card copper-plate">
+                            <div class="stat-icon">🟧</div>
+                            <div class="stat-info">
+                                <div class="stat-label">銅板</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="copper-plate-count">0</span>
+                                    <span class="stat-rate" id="copper-plate-rate">0/分</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⛏️</div>
+                            <div class="stat-info">
+                                <div class="stat-label">採掘機</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="miner-count">0</span>
+                                    <span class="stat-rate" id="miner-efficiency">0% 稼働</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">➡️</div>
+                            <div class="stat-info">
+                                <div class="stat-label">ベルト</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="belt-count">0</span>
+                                    <span class="stat-rate" id="belt-usage">0% 使用</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📦</div>
+                            <div class="stat-info">
+                                <div class="stat-label">チェスト</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="chest-count">0</span>
+                                    <span class="stat-rate" id="chest-capacity">0% 満杯</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-info">
+                                <div class="stat-label">製錬炉</div>
+                                <div class="stat-data">
+                                    <span class="stat-value" id="smelter-count">0</span>
+                                    <span class="stat-rate" id="smelter-efficiency">0% 稼働</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
+                <!-- 生産グラフ -->
+                <section class="chart-section">
+                    <h3 class="section-title">📈 生産グラフ</h3>
+                    <div class="chart-container">
+                        <canvas id="productionChart" width="250" height="100"></canvas>
+                    </div>
+                </section>
+
+
+
+                <!-- デバッグ情報 -->
+                <section class="debug-section">
+                    <div id="debug-info"></div>
+                </section>
+            </aside>
+            
+            <!-- ガイドパネル -->
+            <aside class="guide-panel">
                 <!-- 操作ガイド -->
                 <section class="guide-section">
                     <h3 class="section-title">🎮 操作ガイド</h3>
@@ -220,11 +246,6 @@
                             </div>
                         </div>
                     </div>
-                </section>
-
-                <!-- デバッグ情報 -->
-                <section class="debug-section">
-                    <div id="debug-info"></div>
                 </section>
             </aside>
         </main>
