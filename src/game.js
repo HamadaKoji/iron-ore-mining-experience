@@ -3,6 +3,8 @@ import { TerrainGenerator } from './terrain.js';
 import { BuildingManager } from './buildings.js';
 import { ItemManager } from './items.js';
 import { Renderer } from './renderer.js';
+import { ProductionChart } from './chart.js';
+import { EfficiencyChart } from './efficiency-chart.js';
 
 /**
  * メインゲームクラス
@@ -50,7 +52,9 @@ export class Game {
                 copper_plate: 0
             },
             lastStatsUpdate: Date.now(),
-            productionHistory: [] // 生産グラフ用
+            productionHistory: [], // 生産グラフ用
+            lastEfficiencyUpdate: Date.now(),
+            efficiencyHistory: [] // 効率グラフ用
         };
         
         // モジュール初期化
@@ -58,9 +62,10 @@ export class Game {
         this.buildingManager = new BuildingManager();
         this.itemManager = new ItemManager();
         this.renderer = new Renderer(this.canvas);
+        this.productionChart = new ProductionChart('productionChart');
+        this.efficiencyChart = new EfficiencyChart('efficiencyChart');
         
         this.setupEventListeners();
-        this.setupProductionChart();
         this.gameLoop();
     }
 
@@ -477,7 +482,10 @@ export class Game {
             }
             
             // グラフ更新
-            this.updateProductionChart();
+            this.productionChart.updateData(
+                this.stats.resourceRates.iron_plate,
+                this.stats.resourceRates.copper_plate
+            );
             
             this.stats.lastStatsUpdate = now;
         }
@@ -530,6 +538,67 @@ export class Game {
         // 製錬炉稼働率
         const smelterEfficiency = this.buildingManager.getSmelterUtilization();
         document.getElementById('smelter-efficiency').textContent = `${smelterEfficiency}% 稼働`;
+        
+        // ベルト効率の計算と更新
+        this.updateBeltEfficiency(beltCount);
+    }
+
+    /**
+     * ベルト効率の更新
+     * @param {number} beltCount - ベルトの総数
+     */
+    updateBeltEfficiency(beltCount) {
+        const now = Date.now();
+        const timeDiff = now - this.stats.lastEfficiencyUpdate;
+        
+        // 総金属板生産レート（鉄板 + 銅板）
+        const totalMetalRate = this.stats.resourceRates.iron_plate + this.stats.resourceRates.copper_plate;
+        
+        // UI要素を常に更新
+        document.getElementById('total-metal-rate').textContent = totalMetalRate;
+        document.getElementById('belt-count-efficiency').textContent = beltCount;
+        
+        // ベルト効率を計算
+        const efficiencyElement = document.getElementById('belt-efficiency');
+        let currentEfficiency = 0;
+        
+        if (beltCount === 0) {
+            efficiencyElement.textContent = 'ベルトなし';
+            efficiencyElement.style.color = '#95a5a6';
+        } else {
+            currentEfficiency = totalMetalRate / beltCount;
+            efficiencyElement.textContent = currentEfficiency.toFixed(1);
+            
+            // 効率に応じて色を変更（高効率: 緑、低効率: 赤）
+            if (currentEfficiency >= 2.0) {
+                efficiencyElement.style.color = '#2ecc71'; // 緑
+            } else if (currentEfficiency >= 1.0) {
+                efficiencyElement.style.color = '#f39c12'; // オレンジ
+            } else {
+                efficiencyElement.style.color = '#e74c3c'; // 赤
+            }
+        }
+        
+        // 15秒ごとにグラフを更新
+        if (timeDiff >= 15000) {
+            // 効率履歴に追加
+            this.stats.efficiencyHistory.push({
+                time: now,
+                efficiency: currentEfficiency,
+                totalMetalRate: totalMetalRate,
+                beltCount: beltCount
+            });
+            
+            // 最大20個まで保持（5分間のデータ）
+            if (this.stats.efficiencyHistory.length > 20) {
+                this.stats.efficiencyHistory.shift();
+            }
+            
+            // グラフを更新
+            this.efficiencyChart.updateData(currentEfficiency);
+            
+            this.stats.lastEfficiencyUpdate = now;
+        }
     }
 
     /**

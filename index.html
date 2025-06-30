@@ -147,13 +147,43 @@
 
                 <!-- 生産グラフ -->
                 <section class="chart-section">
-                    <h3 class="section-title">📈 生産グラフ</h3>
+                    <h3 class="section-title">📈 金属板生産グラフ</h3>
                     <div class="chart-container">
-                        <canvas id="productionChart" width="250" height="100"></canvas>
+                        <canvas id="productionChart" width="250" height="150"></canvas>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #4682B4;"></span>
+                                <span class="legend-label">🗾 鉄板</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #FF8C00;"></span>
+                                <span class="legend-label">🟧 銅板</span>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
-
+                <!-- 効率レポート -->
+                <section class="efficiency-section">
+                    <h3 class="section-title">⚡ 効率レポート</h3>
+                    <div class="efficiency-container">
+                        <div class="efficiency-card">
+                            <div class="efficiency-icon">🏭</div>
+                            <div class="efficiency-content">
+                                <div class="efficiency-label">ベルト効率</div>
+                                <div class="efficiency-value" id="belt-efficiency">--</div>
+                                <div class="efficiency-unit">個/分/ベルト</div>
+                                <div class="efficiency-detail">
+                                    総金属板生産: <span id="total-metal-rate">0</span> 個/分<br>
+                                    ベルト数: <span id="belt-count-efficiency">0</span> 個
+                                </div>
+                            </div>
+                        </div>
+                        <div class="efficiency-chart">
+                            <canvas id="efficiencyChart" width="250" height="120"></canvas>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- デバッグ情報 -->
                 <section class="debug-section">
