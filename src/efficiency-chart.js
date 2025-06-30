@@ -18,7 +18,7 @@ export class EfficiencyChart {
             paddingBottom: 25,
             gridLines: 4,
             color: '#f39c12',
-            minYScale: 4.0,  // 最小Y軸スケール
+            minYScale: 20.0,  // 最小Y軸スケール（生産密度システム用）
             yScaleMultiplier: 1.2  // データ最大値に対する余裕係数
         };
         
