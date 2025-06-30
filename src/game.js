@@ -5,6 +5,9 @@ import { ItemManager } from './items.js';
 import { Renderer } from './renderer.js';
 import { EfficiencyChart } from './efficiency-chart.js';
 
+// LocalStorageキー
+const MAX_EFFICIENCY_KEY = 'maxBeltEfficiency';
+
 /**
  * メインゲームクラス
  */
@@ -74,7 +77,7 @@ export class Game {
      * @returns {Object} 最大効率データ
      */
     loadMaxEfficiency() {
-        const saved = localStorage.getItem('maxBeltEfficiency');
+        const saved = localStorage.getItem(MAX_EFFICIENCY_KEY);
         if (saved) {
             return JSON.parse(saved);
         }
@@ -104,9 +107,22 @@ export class Game {
             buildingStats: buildingStats
         };
         this.stats.maxBeltEfficiency = data;
-        localStorage.setItem('maxBeltEfficiency', JSON.stringify(data));
+        localStorage.setItem(MAX_EFFICIENCY_KEY, JSON.stringify(data));
     }
     
+    /**
+     * カウントをリセットするヘルパー関数
+     */
+    resetCounts() {
+        // 生産カウントをリセット
+        Object.keys(this.totalProduced).forEach(key => {
+            this.totalProduced[key] = 0;
+        });
+        Object.keys(this.resourceCounts).forEach(key => {
+            this.resourceCounts[key] = 0;
+        });
+    }
+
     /**
      * ゲームをリセット（建物を全て削除、記録もリセット）
      */
@@ -116,13 +132,8 @@ export class Game {
             this.buildingManager.clear();
             this.itemManager.clear();
             
-            // 生産カウントをリセット
-            Object.keys(this.totalProduced).forEach(key => {
-                this.totalProduced[key] = 0;
-            });
-            Object.keys(this.resourceCounts).forEach(key => {
-                this.resourceCounts[key] = 0;
-            });
+            // カウントをリセット
+            this.resetCounts();
             
             // 統計をリセット
             Object.keys(this.stats.resourceRates).forEach(key => {
@@ -141,6 +152,40 @@ export class Game {
     }
 
     /**
+     * ベストスコアをクリア
+     */
+    clearBestScore() {
+        if (confirm('ベストスコアをクリアしますか？\nゲーム画面もリセットされます。')) {
+            // ベストスコアをクリア
+            localStorage.removeItem(MAX_EFFICIENCY_KEY);
+            this.maxEfficiency = 0;
+            
+            // ゲームもリセット（確認なし）
+            this.buildingManager.clear();
+            this.itemManager.clear();
+            
+            // カウントをリセット
+            this.resetCounts();
+            
+            // 統計をリセット
+            Object.keys(this.stats.resourceRates).forEach(key => {
+                this.stats.resourceRates[key] = 0;
+                this.stats.lastResourceCounts[key] = 0;
+            });
+            this.stats.productionHistory = [];
+            this.stats.efficiencyHistory = [];
+            
+            // グラフをクリア
+            this.efficiencyChart.data = new Array(this.efficiencyChart.maxDataPoints).fill(0);
+            this.efficiencyChart.draw();
+            
+            // UIを更新
+            this.updateDisplay();
+            this.updateMaxEfficiencyDisplay();
+        }
+    }
+
+    /**
      * イベントリスナー設定
      */
     setupEventListeners() {
@@ -155,6 +200,9 @@ export class Game {
         
         // リセットボタン
         document.getElementById('reset-btn')?.addEventListener('click', () => this.resetGame());
+        
+        // ベストスコアクリアボタン
+        document.getElementById('clear-best-score-btn')?.addEventListener('click', () => this.clearBestScore());
         
         // キャンバスイベント
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
