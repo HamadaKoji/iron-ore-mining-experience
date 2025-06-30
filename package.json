@@ -1,7 +1,7 @@
 {
-  "name": "iron-ore-mining-experience",
-  "version": "1.1.0",
-  "description": "初めての鉄鉱石採掘体験 - Factorio風シンプル工場シミュレーションゲーム",
+  "name": "production-density-challenge",
+  "version": "3.0.0",
+  "description": "生産密度チャレンジ - 限られた資源で最高効率の工場を作るスコアチャレンジゲーム",
   "type": "module",
   "main": "src/main.js",
   "scripts": {
