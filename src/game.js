@@ -266,7 +266,7 @@ export class Game {
         this.previewElement.className = canPlace ? 'building-preview' : 'building-preview invalid';
 
         // プレビューの位置とサイズを設定
-        const cellSize = 32; // GAME_CONFIG.CELL_SIZEと同じ値
+        const cellSize = GAME_CONFIG.CELL_SIZE;
         const rect = this.canvas.getBoundingClientRect();
         const canvasX = mouseX - rect.left;
         const canvasY = mouseY - rect.top;
