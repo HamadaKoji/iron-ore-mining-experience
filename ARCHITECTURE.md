@@ -1,6 +1,6 @@
 # アーキテクチャ設計書
 
-このドキュメントは「初めての鉄鉱石採掘体験」のシステム設計と技術的な構造について説明します。
+このドキュメントは「生産密度チャレンジ」のシステム設計と技術的な構造について説明します。
 
 ## 🏗️ システム概要
 
@@ -20,7 +20,7 @@ Deploy: GitHub Pages
 ## 📁 ディレクトリ構造
 
 ```
-iron-ore-mining-experience/
+factory-game/
 ├── src/                    # ソースコード
 │   ├── config.js          # 設定・定数
 │   ├── terrain.js         # 地形生成（Model）
@@ -127,7 +127,24 @@ class Renderer {
 - 再利用可能な描画メソッド
 - パフォーマンス最適化
 
-### 6. Game Module (`src/game.js`)
+### 6. EfficiencyChart Module (`src/efficiency-chart.js`)
+**責任**: 生産密度効率のリアルタイムグラフ描画
+
+```javascript
+class EfficiencyChart {
+    updateChart(efficiency)              // グラフ更新
+    clearChart()                         // グラフクリア
+    drawGrid()                           // グリッド描画
+    drawData()                           // データ線描画
+}
+```
+
+**設計原則**:
+- 5分間の履歴データ管理
+- 動的なスケーリング
+- 滑らかなアニメーション
+
+### 7. Game Module (`src/game.js`)
 **責任**: ゲーム全体の制御とオーケストレーション
 
 ```javascript
@@ -171,7 +188,7 @@ Game.update → ItemManager.moveItems → BuildingManager参照 → 状態更新
 ### 地形データ
 ```javascript
 terrain: Array<Array<string>>
-// terrain[y][x] = 'grass' | 'ore'
+// terrain[y][x] = 'grass' | 'iron_ore' | 'copper_ore' | 'coal'
 ```
 
 ### 建物データ
@@ -184,6 +201,15 @@ buildings: Map<string, Building>
 ```javascript
 items: Map<string, Array<Item>>
 // key: "x,y", value: [{ type, x, y, createdTime }]
+```
+
+### 生産密度システム
+```javascript
+// 稼働効率 = (稼働中の採掘機数 × 稼働中の製錬炉数) ÷ 総建物数
+operatingEfficiency = (activeMinerCount * activeSmelterCount) / totalBuildings;
+
+// 生産密度スコア = 総金属板生産量 × 稼働効率
+productionDensityScore = totalMetalProduction * operatingEfficiency;
 ```
 
 ## ⚡ パフォーマンス設計
@@ -245,6 +271,15 @@ BUILDING_TYPES.FURNACE = 'furnace';
 // 4. 包括的なテスト追加
 ```
 
+#### 4. 資源配置アルゴリズム
+```javascript
+// クラスター配置による公平な資源分布
+// 固定数: 鉄鉱石 25個、銅鉱石 20個、石炭 15個
+// 1. クラスター中心をランダムに配置
+// 2. 中心から広がるように資源を配置
+// 3. 各資源タイプごとに固定数を保証
+```
+
 ### プラグイン設計（将来）
 ```javascript
 // プラグインインターフェース例
@@ -261,7 +296,7 @@ interface GamePlugin {
 - **ブラウザ依存**: ES6モジュール対応ブラウザのみ
 - **シングルプレイヤー**: マルチプレイヤー非対応
 - **メモリ制限**: 大規模マップ非対応
-- **永続化なし**: セーブ・ロード機能なし
+- **部分的な永続化**: ベストスコアのみLocalStorageで保存
 
 ### 技術的負債
 - **Rendererのテスト不足**: Canvas描画のテスト困難

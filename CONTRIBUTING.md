@@ -1,6 +1,6 @@
 # 貢献ガイド
 
-「初めての鉄鉱石採掘体験」プロジェクトへの貢献を歓迎します！
+「生産密度チャレンジ」プロジェクトへの貢献を歓迎します！
 このガイドでは、効果的に貢献するための手順とルールを説明します。
 
 ## 🎯 貢献の種類
@@ -34,8 +34,8 @@
 ### 1. 環境セットアップ
 ```bash
 # リポジトリをフォーク
-git clone https://github.com/HamadaKoji/iron-ore-mining-experience.git
-cd iron-ore-mining-experience
+git clone https://github.com/HamadaKoji/factory-game.git
+cd factory-game
 
 # 依存関係の確認（Node.js必要）
 node --version  # v14以上推奨
@@ -62,6 +62,8 @@ http://localhost:8000/test.html
 1. **既存Issueの確認**: 重複を避けるため既存のIssueを確認
 2. **新しいIssue作成**: バグ報告や機能提案のIssue作成
 3. **議論**: 実装方針について事前に議論
+
+**重要**: mainブランチへの直接pushは禁止されています。必ずPull Requestを経由してください。
 
 ### Step 2: 開発準備
 ```bash
