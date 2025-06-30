@@ -8,7 +8,7 @@ import { beltDirectionTests } from './belt-directions.test.js';
  * 全テストを実行
  */
 async function runAllTests() {
-    console.log('🚀 初めての鉄鉱石採掘体験 - テスト実行\n');
+    console.log('🚀 生産密度チャレンジ - テスト実行\n');
     
     console.log('📍 地形生成テスト');
     console.log('='.repeat(50));
