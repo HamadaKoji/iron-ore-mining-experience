@@ -534,6 +534,41 @@ export class Game {
         // 製錬炉稼働率
         const smelterEfficiency = this.buildingManager.getSmelterUtilization();
         document.getElementById('smelter-efficiency').textContent = `${smelterEfficiency}% 稼働`;
+        
+        // ベルト効率の計算と更新
+        this.updateBeltEfficiency(beltCount);
+    }
+
+    /**
+     * ベルト効率の更新
+     * @param {number} beltCount - ベルトの総数
+     */
+    updateBeltEfficiency(beltCount) {
+        // 総金属板生産レート（鉄板 + 銅板）
+        const totalMetalRate = this.stats.resourceRates.iron_plate + this.stats.resourceRates.copper_plate;
+        
+        // UI要素を更新
+        document.getElementById('total-metal-rate').textContent = totalMetalRate;
+        document.getElementById('belt-count-efficiency').textContent = beltCount;
+        
+        // ベルト効率を計算
+        const efficiencyElement = document.getElementById('belt-efficiency');
+        if (beltCount === 0) {
+            efficiencyElement.textContent = 'ベルトなし';
+            efficiencyElement.style.color = '#95a5a6';
+        } else {
+            const efficiency = totalMetalRate / beltCount;
+            efficiencyElement.textContent = efficiency.toFixed(1);
+            
+            // 効率に応じて色を変更（高効率: 緑、低効率: 赤）
+            if (efficiency >= 2.0) {
+                efficiencyElement.style.color = '#2ecc71'; // 緑
+            } else if (efficiency >= 1.0) {
+                efficiencyElement.style.color = '#f39c12'; // オレンジ
+            } else {
+                efficiencyElement.style.color = '#e74c3c'; // 赤
+            }
+        }
     }
 
     /**
